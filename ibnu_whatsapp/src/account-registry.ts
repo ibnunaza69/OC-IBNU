@@ -1,3 +1,5 @@
+import { DatabaseSync } from 'node:sqlite'
+import { BufferJSON } from '@whiskeysockets/baileys'
 import * as fs from 'fs'
 import * as path from 'path'
 
@@ -11,73 +13,89 @@ export interface AccountRegistryEntry {
 }
 
 export class AccountRegistry {
-  constructor(private readonly filePath: string) {}
+  private readonly db: DatabaseSync
 
-  private ensureDir() {
-    const dir = path.dirname(this.filePath)
+  constructor(private readonly filePath: string) {
+    const dir = path.dirname(filePath)
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true })
     }
+
+    this.db = new DatabaseSync(filePath)
+    this.db.exec(`
+      CREATE TABLE IF NOT EXISTS account_registry (
+        account_id TEXT PRIMARY KEY,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        pairing_number TEXT,
+        last_started_at TEXT,
+        state TEXT
+      );
+    `)
   }
 
-  private readAll(): AccountRegistryEntry[] {
-    this.ensureDir()
-    if (!fs.existsSync(this.filePath)) {
-      return []
+  private rowToEntry(row: Record<string, unknown>): AccountRegistryEntry {
+    return {
+      accountId: String(row.account_id),
+      createdAt: String(row.created_at),
+      updatedAt: String(row.updated_at),
+      pairingNumber: row.pairing_number ? String(row.pairing_number) : undefined,
+      lastStartedAt: row.last_started_at ? String(row.last_started_at) : undefined,
+      state: row.state ? (String(row.state) as AccountRegistryEntry['state']) : undefined,
     }
-
-    const raw = fs.readFileSync(this.filePath, 'utf8')
-    if (!raw.trim()) {
-      return []
-    }
-
-    return JSON.parse(raw) as AccountRegistryEntry[]
-  }
-
-  private writeAll(entries: AccountRegistryEntry[]) {
-    this.ensureDir()
-    fs.writeFileSync(this.filePath, JSON.stringify(entries, null, 2))
   }
 
   list() {
-    return this.readAll()
+    const rows = this.db.prepare('SELECT * FROM account_registry ORDER BY account_id').all() as Array<Record<string, unknown>>
+    return rows.map((row) => this.rowToEntry(row))
   }
 
   get(accountId: string) {
-    return this.readAll().find((entry) => entry.accountId === accountId)
+    const row = this.db.prepare('SELECT * FROM account_registry WHERE account_id = ?').get(accountId) as Record<string, unknown> | undefined
+    return row ? this.rowToEntry(row) : undefined
   }
 
   upsert(accountId: string, patch: Partial<AccountRegistryEntry> = {}) {
     const now = new Date().toISOString()
-    const entries = this.readAll()
-    const index = entries.findIndex((entry) => entry.accountId === accountId)
+    const existing = this.get(accountId)
+    const entry: AccountRegistryEntry = existing
+      ? {
+          ...existing,
+          ...patch,
+          accountId,
+          updatedAt: now,
+        }
+      : {
+          accountId,
+          createdAt: now,
+          updatedAt: now,
+          state: 'created',
+          ...patch,
+        }
 
-    if (index === -1) {
-      const created: AccountRegistryEntry = {
-        accountId,
-        createdAt: now,
-        updatedAt: now,
-        state: 'created',
-        ...patch,
-      }
-      entries.push(created)
-      this.writeAll(entries)
-      return created
-    }
+    this.db.prepare(
+      `INSERT INTO account_registry (
+        account_id, created_at, updated_at, pairing_number, last_started_at, state
+      ) VALUES (?, ?, ?, ?, ?, ?)
+      ON CONFLICT(account_id) DO UPDATE SET
+        created_at = excluded.created_at,
+        updated_at = excluded.updated_at,
+        pairing_number = excluded.pairing_number,
+        last_started_at = excluded.last_started_at,
+        state = excluded.state`
+    ).run(
+      entry.accountId,
+      entry.createdAt,
+      entry.updatedAt,
+      entry.pairingNumber ?? null,
+      entry.lastStartedAt ?? null,
+      entry.state ?? null
+    )
 
-    const updated: AccountRegistryEntry = {
-      ...entries[index],
-      ...patch,
-      accountId,
-      updatedAt: now,
-    }
-    entries[index] = updated
-    this.writeAll(entries)
-    return updated
+    return entry
   }
 
   remove(accountId: string) {
-    const entries = this.readAll().filter((entry) => entry.accountId !== accountId)
-    this.writeAll(entries)
+    this.db.prepare('DELETE FROM account_registry WHERE account_id = ?').run(accountId)
   }
 }

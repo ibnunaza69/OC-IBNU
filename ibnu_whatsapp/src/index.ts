@@ -9,6 +9,7 @@ async function main() {
   console.log('🚀 ibnu_whatsapp starting...')
   console.log(`   Port: ${APP_CONFIG.port}`)
   console.log(`   Session dir: ${APP_CONFIG.sessionDir}`)
+  console.log(`   Registry DB: ${APP_CONFIG.accountRegistryPath}`)
   console.log(`   Pairing number: ${APP_CONFIG.pairingNumber ? 'set' : 'not set'}`)
   console.log(`   Default account: ${APP_CONFIG.defaultAccountId}`)
   console.log(`   Webhook target: ${APP_CONFIG.webhookUrl || 'not set'}`)

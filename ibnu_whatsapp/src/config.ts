@@ -13,5 +13,5 @@ export const APP_CONFIG = {
     .split(',')
     .map((key) => key.trim())
     .filter(Boolean),
-  accountRegistryPath: path.resolve('./data/accounts.json'),
+  accountRegistryPath: path.resolve('./data/accounts.sqlite'),
 } as const
