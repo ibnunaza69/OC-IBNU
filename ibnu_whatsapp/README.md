@@ -8,10 +8,12 @@ Project sudah masuk fondasi implementasi dengan komponen berikut:
 - TypeScript + Node.js
 - Gateway manager untuk multi-account
 - REST API dasar
-- Webhook placeholder + contract
+- Webhook contract + outbound dispatcher
 - Admin API skeleton
 - Simple admin page
 - Auth/session storage abstraction
+- Account registry metadata
+- Per-account send queue dasar
 
 > Catatan: pairing WhatsApp di VPS ini masih gagal sebelum QR keluar. Jadi fondasinya jalan, tapi login WA belum terbukti sukses di environment ini.
 
@@ -44,6 +46,7 @@ Variabel penting:
 - `GET /status`
 - `GET /accounts`
 - `GET /accounts/:accountId`
+  - sekarang juga expose metadata registry account
 
 ### Account control
 - `POST /accounts`
@@ -70,6 +73,14 @@ Body contoh:
 
 ### Webhook
 - `POST /webhook`
+- outbound dispatch event ke `WEBHOOK_URL` bila di-set
+
+Event yang sudah disiapkan:
+- `gateway.started`
+- `gateway.connection.update`
+- `gateway.qr.received`
+- `gateway.message.received`
+- `gateway.creds.updated`
 
 ### Admin
 - `GET /admin`
@@ -99,12 +110,16 @@ curl -X POST http://localhost:8080/send \
 - `src/gateway-manager.ts` → lifecycle account/socket
 - `src/api.ts` → REST API
 - `src/webhook-contract.ts` → contract event webhook
+- `src/webhook-dispatcher.ts` → outbound webhook dispatcher
 - `src/admin-contract.ts` → contract admin API
 - `src/admin-page.ts` → HTML admin page sederhana
+- `src/account-registry.ts` → metadata registry account
+- `src/send-queue.ts` → serial queue per account
+- `src/event-bus.ts` → internal event bus
 
 ## Next recommended steps
-1. real webhook dispatcher
-2. persistent DB-backed auth store
-3. admin dashboard frontend terpisah
-4. retry / queue / rate-limit layer
+1. persistent DB-backed auth store
+2. admin dashboard frontend terpisah
+3. retry policy + rate-limit layer yang lebih tegas
+4. outbound webhook retry/signature hardening
 5. pembuktian pairing dari environment lain

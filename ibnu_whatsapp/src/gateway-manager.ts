@@ -7,6 +7,15 @@ import { Boom } from '@hapi/boom'
 import QRCode from 'qrcode'
 import { APP_CONFIG } from './config.js'
 import { AuthStore } from './auth-store.js'
+import { SendQueue } from './send-queue.js'
+import { AccountRegistry } from './account-registry.js'
+import { GatewayEventBus } from './event-bus.js'
+import type {
+  GatewayConnectionUpdateData,
+  GatewayMessageReceivedData,
+  GatewayQrReceivedData,
+  GatewayWebhookEnvelope,
+} from './webhook-contract.js'
 
 export type GatewayAccountStatus = {
   accountId: string
@@ -29,9 +38,26 @@ export class GatewayManager {
   private readonly accounts = new Map<string, ManagedAccount>()
   private readonly startingAccounts = new Set<string>()
   private readonly authStore: AuthStore
+  private readonly sendQueue = new SendQueue()
 
-  constructor(sessionDir: string = APP_CONFIG.sessionDir) {
+  constructor(
+    sessionDir: string = APP_CONFIG.sessionDir,
+    private readonly registry: AccountRegistry = new AccountRegistry(APP_CONFIG.accountRegistryPath),
+    private readonly eventBus: GatewayEventBus = new GatewayEventBus()
+  ) {
     this.authStore = new AuthStore(sessionDir)
+  }
+
+  getEventBus() {
+    return this.eventBus
+  }
+
+  getRegistry() {
+    return this.registry
+  }
+
+  private emit<TData>(envelope: GatewayWebhookEnvelope<TData>) {
+    this.eventBus.emitWebhook(envelope)
   }
 
   private getOrCreateAccount(accountId: string) {
@@ -47,6 +73,7 @@ export class GatewayManager {
     }
 
     this.accounts.set(accountId, created)
+    this.registry.upsert(accountId)
     return created
   }
 
@@ -77,6 +104,17 @@ export class GatewayManager {
     }
 
     this.startingAccounts.add(accountId)
+    this.registry.upsert(accountId, {
+      pairingNumber,
+      lastStartedAt: new Date().toISOString(),
+    })
+
+    this.emit({
+      event: 'gateway.started',
+      accountId,
+      timestamp: new Date().toISOString(),
+      data: { pairingNumberConfigured: Boolean(pairingNumber) },
+    })
 
     try {
       const { state, saveCreds } = await this.authStore.load(accountId)
@@ -102,9 +140,24 @@ export class GatewayManager {
 
         if (connection) {
           console.log(`[${accountId}] connection.update → ${connection}`)
-          this.updateStatus(accountId, {
+          const status = this.updateStatus(accountId, {
             connected: connection === 'open',
             lastConnection: connection,
+          })
+
+          const data: GatewayConnectionUpdateData = {
+            connection,
+            lastConnection: status.lastConnection,
+            registered: status.registered,
+            phoneNumber: status.phoneNumber,
+            platform: status.platform,
+          }
+
+          this.emit({
+            event: 'gateway.connection.update',
+            accountId,
+            timestamp: new Date().toISOString(),
+            data,
           })
         }
 
@@ -114,6 +167,15 @@ export class GatewayManager {
           void this.saveQr(qr)
             .then(() => {
               console.log(`[${accountId}] QR saved to ${APP_CONFIG.qrOutputPath}`)
+              const data: GatewayQrReceivedData = {
+                qrPath: APP_CONFIG.qrOutputPath,
+              }
+              this.emit({
+                event: 'gateway.qr.received',
+                accountId,
+                timestamp: new Date().toISOString(),
+                data,
+              })
             })
             .catch((error: unknown) => {
               console.error(`[${accountId}] failed to save QR`, error)
@@ -171,10 +233,21 @@ export class GatewayManager {
 
       sock.ev.on('creds.update', async () => {
         await saveCreds()
-        this.updateStatus(accountId, {
+        const status = this.updateStatus(accountId, {
           registered: !!sock.authState.creds.registered,
           phoneNumber: sock.authState.creds.me?.id ?? undefined,
           platform: sock.authState.creds.platform,
+        })
+
+        this.emit({
+          event: 'gateway.creds.updated',
+          accountId,
+          timestamp: new Date().toISOString(),
+          data: {
+            registered: status.registered,
+            phoneNumber: status.phoneNumber,
+            platform: status.platform,
+          },
         })
       })
 
@@ -189,6 +262,18 @@ export class GatewayManager {
 
           if (!fromMe && jid && body) {
             console.log(`[${accountId}] 📩 ${jid}: ${body}`)
+
+            const data: GatewayMessageReceivedData = {
+              jid,
+              text: body,
+            }
+
+            this.emit({
+              event: 'gateway.message.received',
+              accountId,
+              timestamp: new Date().toISOString(),
+              data,
+            })
           }
         }
       })
@@ -222,19 +307,25 @@ export class GatewayManager {
       ids.add(accountId)
     }
 
+    for (const entry of this.registry.list()) {
+      ids.add(entry.accountId)
+    }
+
     return Array.from(ids).sort()
   }
 
   async sendText(accountId: string, jid: string, text: string) {
-    const sock = this.getSock(accountId)
-    if (!sock) {
-      throw new Error(`Account '${accountId}' is not initialized`)
-    }
+    return this.sendQueue.enqueue(accountId, async () => {
+      const sock = this.getSock(accountId)
+      if (!sock) {
+        throw new Error(`Account '${accountId}' is not initialized`)
+      }
 
-    if (!sock.authState.creds.registered) {
-      throw new Error(`Account '${accountId}' is not connected to WhatsApp`)
-    }
+      if (!sock.authState.creds.registered) {
+        throw new Error(`Account '${accountId}' is not connected to WhatsApp`)
+      }
 
-    return sock.sendMessage(jid, { text })
+      return sock.sendMessage(jid, { text })
+    })
   }
 }

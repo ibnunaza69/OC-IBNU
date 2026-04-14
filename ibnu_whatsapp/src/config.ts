@@ -7,4 +7,7 @@ export const APP_CONFIG = {
   defaultAccountId: process.env.DEFAULT_ACCOUNT_ID || 'default',
   qrOutputPath: path.resolve('./sessions/latest-qr.png'),
   webhookPath: process.env.WEBHOOK_PATH || '/webhook',
+  webhookUrl: process.env.WEBHOOK_URL || '',
+  webhookSecret: process.env.WEBHOOK_SECRET || '',
+  accountRegistryPath: path.resolve('./data/accounts.json'),
 } as const

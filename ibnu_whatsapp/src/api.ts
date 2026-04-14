@@ -45,6 +45,7 @@ export function createApi(manager: GatewayManager) {
       defaultAccountId: APP_CONFIG.defaultAccountId,
       accountIds: manager.listKnownAccountIds(),
       accounts: manager.listStatuses(),
+      registry: manager.getRegistry().list(),
     })
   })
 
@@ -52,8 +53,9 @@ export function createApi(manager: GatewayManager) {
     const rawAccountId = req.params.accountId
     const accountId = Array.isArray(rawAccountId) ? rawAccountId[0] : rawAccountId
     const account = manager.getAccount(accountId)
+    const registry = manager.getRegistry().get(accountId)
 
-    if (!account) {
+    if (!account && !registry) {
       return res.status(404).json({
         success: false,
         error: `Account '${accountId}' not found`,
@@ -62,7 +64,8 @@ export function createApi(manager: GatewayManager) {
 
     return res.json({
       success: true,
-      account: account.status,
+      account: account?.status,
+      registry,
     })
   })
 
@@ -84,6 +87,7 @@ export function createApi(manager: GatewayManager) {
         success: true,
         accountId,
         status: manager.getAccount(accountId)?.status,
+        registry: manager.getRegistry().get(accountId),
       })
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
@@ -158,6 +162,7 @@ export function createApi(manager: GatewayManager) {
     res.json({
       webhook: {
         path: APP_CONFIG.webhookPath,
+        targetUrl: APP_CONFIG.webhookUrl || null,
         sampleEnvelope: sampleWebhook,
       },
       admin: {
