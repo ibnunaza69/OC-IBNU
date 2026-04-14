@@ -8,6 +8,11 @@ interface SendRequest {
   text: string
 }
 
+interface StartAccountRequest {
+  accountId: string
+  pairingNumber?: string
+}
+
 interface WebhookPayload {
   event?: string
   data?: unknown
@@ -30,6 +35,61 @@ export function createApi(manager: GatewayManager) {
     res.json({
       accounts: manager.listStatuses(),
     })
+  })
+
+  app.get('/accounts', (_req: Request, res: Response) => {
+    res.json({
+      defaultAccountId: APP_CONFIG.defaultAccountId,
+      accountIds: manager.listKnownAccountIds(),
+      accounts: manager.listStatuses(),
+    })
+  })
+
+  app.get('/accounts/:accountId', (req: Request, res: Response) => {
+    const rawAccountId = req.params.accountId
+    const accountId = Array.isArray(rawAccountId) ? rawAccountId[0] : rawAccountId
+    const account = manager.getAccount(accountId)
+
+    if (!account) {
+      return res.status(404).json({
+        success: false,
+        error: `Account '${accountId}' not found`,
+      })
+    }
+
+    return res.json({
+      success: true,
+      account: account.status,
+    })
+  })
+
+  app.post('/accounts', async (req: Request<{}, {}, StartAccountRequest>, res: Response) => {
+    const { accountId, pairingNumber } = req.body
+
+    if (!accountId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing accountId',
+      })
+    }
+
+    manager.ensureAccount(accountId)
+
+    try {
+      await manager.startAccount(accountId, pairingNumber)
+      return res.json({
+        success: true,
+        accountId,
+        status: manager.getAccount(accountId)?.status,
+      })
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      return res.status(500).json({
+        success: false,
+        accountId,
+        error: message,
+      })
+    }
   })
 
   app.post('/send', async (req: Request<{}, {}, SendRequest>, res: Response) => {

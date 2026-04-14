@@ -29,6 +29,7 @@ type ManagedAccount = {
 
 export class GatewayManager {
   private readonly accounts = new Map<string, ManagedAccount>()
+  private readonly startingAccounts = new Set<string>()
 
   constructor(private readonly sessionDir: string = APP_CONFIG.sessionDir) {}
 
@@ -91,7 +92,17 @@ export class GatewayManager {
   }
 
   async startAccount(accountId: string, pairingNumber?: string): Promise<ManagedSock> {
-    const { state, saveCreds } = await this.getAuthState(accountId)
+    if (this.startingAccounts.has(accountId)) {
+      const existingSock = this.getSock(accountId)
+      if (existingSock) {
+        return existingSock
+      }
+    }
+
+    this.startingAccounts.add(accountId)
+
+    try {
+      const { state, saveCreds } = await this.getAuthState(accountId)
 
     const sock = makeWASocket({
       auth: state,
@@ -206,6 +217,13 @@ export class GatewayManager {
     })
 
     return sock
+    } finally {
+      this.startingAccounts.delete(accountId)
+    }
+  }
+
+  ensureAccount(accountId: string) {
+    return this.getOrCreateAccount(accountId).status
   }
 
   getAccount(accountId: string) {
@@ -218,6 +236,20 @@ export class GatewayManager {
 
   listStatuses() {
     return Array.from(this.accounts.values()).map((entry) => entry.status)
+  }
+
+  listKnownAccountIds() {
+    const ids = new Set<string>(this.accounts.keys())
+
+    if (fs.existsSync(this.sessionDir)) {
+      for (const entry of fs.readdirSync(this.sessionDir, { withFileTypes: true })) {
+        if (entry.isDirectory()) {
+          ids.add(entry.name)
+        }
+      }
+    }
+
+    return Array.from(ids).sort()
   }
 
   async sendText(accountId: string, jid: string, text: string) {
