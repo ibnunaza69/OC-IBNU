@@ -5,6 +5,7 @@ export type GatewayWebhookEventName =
   | 'gateway.message.received'
   | 'gateway.creds.updated'
   | 'gateway.send.queued'
+  | 'gateway.error'
 
 export interface GatewayWebhookEnvelope<TData = unknown> {
   event: GatewayWebhookEventName

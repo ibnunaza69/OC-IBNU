@@ -16,6 +16,9 @@ export interface AdminOverviewResponse {
     phoneNumber?: string
     platform?: string
     lastConnection?: string
+    lastConnectionAt?: string
+    lastDisconnectReason?: string
+    lastError?: string
     lastQrAt?: string
   }[]
 }

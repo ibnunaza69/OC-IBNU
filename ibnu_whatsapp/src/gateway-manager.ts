@@ -26,6 +26,9 @@ export type GatewayAccountStatus = {
   phoneNumber?: string
   platform?: string
   lastConnection?: string
+  lastConnectionAt?: string
+  lastDisconnectReason?: string
+  lastError?: string
   lastQrAt?: string
 }
 
@@ -148,6 +151,7 @@ export class GatewayManager {
           const status = this.updateStatus(accountId, {
             connected: connection === 'open',
             lastConnection: connection,
+            lastConnectionAt: new Date().toISOString(),
           })
 
           if (connection === 'open') {
@@ -216,8 +220,10 @@ export class GatewayManager {
         }
 
         if (connection === 'close') {
-          const shouldReconnect =
-            (lastDisconnect?.error as Boom)?.output?.statusCode !== DisconnectReason.loggedOut
+          const disconnectError = lastDisconnect?.error as Boom | undefined
+          const shouldReconnect = disconnectError?.output?.statusCode !== DisconnectReason.loggedOut
+          const disconnectReason =
+            disconnectError?.message ?? disconnectError?.output?.payload?.message ?? 'unknown'
 
           console.log(
             `[${accountId}] 🔌 Connection closed: ${lastDisconnect?.error}` +
@@ -229,6 +235,9 @@ export class GatewayManager {
             registered: !!sock.authState.creds.registered,
             phoneNumber: sock.authState.creds.me?.id ?? undefined,
             platform: sock.authState.creds.platform,
+            lastDisconnectReason: disconnectReason,
+            lastError: String(lastDisconnect?.error ?? ''),
+            lastConnectionAt: new Date().toISOString(),
           })
 
           this.registry.upsert(accountId, { state: 'stopped' })
@@ -236,7 +245,8 @@ export class GatewayManager {
           if (shouldReconnect) {
             void this.startAccount(accountId, pairingNumber)
           } else {
-            console.warn(`[${accountId}] ⚠️ Session logged out. Removing session folder for re-pair.`)
+            console.warn(`[${accountId}] ⚠️ Session logged out. Removing auth data for re-pair.`)
+            this.sqliteAuthStore.remove(accountId)
             this.authStore.remove(accountId)
           }
         }
@@ -359,6 +369,7 @@ export class GatewayManager {
 
   async resetSession(accountId: string) {
     await this.stopAccount(accountId)
+    this.sqliteAuthStore.reset(accountId)
     this.authStore.reset(accountId)
     this.registry.upsert(accountId, { state: 'reset' })
 
@@ -371,6 +382,7 @@ export class GatewayManager {
   async removeAccount(accountId: string) {
     await this.stopAccount(accountId)
     this.accounts.delete(accountId)
+    this.sqliteAuthStore.remove(accountId)
     this.authStore.remove(accountId)
     this.registry.remove(accountId)
 

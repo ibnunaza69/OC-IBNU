@@ -35,16 +35,27 @@ export function createApi(manager: GatewayManager) {
   app.use(apiKeyMiddleware(APP_CONFIG.apiKeys))
 
   app.get('/health', (_req: Request, res: Response) => {
+    const accounts = manager.listStatuses()
+    const registry = manager.getRegistry().list()
+
     res.json({
       status: 'ok',
       uptime: process.uptime(),
-      accounts: manager.listStatuses(),
+      accountCount: accounts.length,
+      registryCount: registry.length,
+      connectedCount: accounts.filter((account) => account.connected).length,
+      registeredCount: accounts.filter((account) => account.registered).length,
+      accounts,
     })
   })
 
   app.get('/status', (_req: Request, res: Response) => {
+    const accounts = manager.listStatuses()
     res.json({
-      accounts: manager.listStatuses(),
+      accountCount: accounts.length,
+      connectedCount: accounts.filter((account) => account.connected).length,
+      registeredCount: accounts.filter((account) => account.registered).length,
+      accounts,
     })
   })
 
@@ -193,6 +204,7 @@ export function createApi(manager: GatewayManager) {
   })
 
   app.get('/admin/overview', (_req: Request, res: Response) => {
+    const accounts = manager.listStatuses()
     const response: AdminOverviewResponse = {
       service: {
         name: 'ibnu_whatsapp',
@@ -204,7 +216,7 @@ export function createApi(manager: GatewayManager) {
         webhookPath: APP_CONFIG.webhookPath,
         sessionDir: APP_CONFIG.sessionDir,
       },
-      accounts: manager.listStatuses(),
+      accounts,
     }
 
     res.json(response)
