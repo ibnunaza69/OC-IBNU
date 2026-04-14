@@ -25,8 +25,13 @@ async function main() {
     console.log(`\n🌐 REST API listening on http://localhost:${APP_CONFIG.port}`)
     console.log(`   GET  /health               — gateway health`)
     console.log(`   GET  /status               — all account statuses`)
+    console.log(`   GET  /accounts             — list known accounts`)
+    console.log(`   POST /accounts             — start/init account`)
     console.log(`   POST /send                 — send message`)
     console.log(`   POST ${APP_CONFIG.webhookPath}         — inbound webhook placeholder`)
+    console.log(`   GET  /admin                — simple admin page`)
+    console.log(`   GET  /admin/overview       — admin summary JSON`)
+    console.log(`   GET  /admin/contracts      — API/webhook contracts`)
     console.log(`\n📡 Gateway running. Press Ctrl+C to stop.\n`)
   })
 

@@ -3,6 +3,7 @@ import { APP_CONFIG } from './config.js'
 import { GatewayManager } from './gateway-manager.js'
 import type { AdminOverviewResponse } from './admin-contract.js'
 import type { GatewayWebhookEnvelope } from './webhook-contract.js'
+import { renderAdminPage } from './admin-page.js'
 
 interface SendRequest {
   accountId?: string
@@ -120,6 +121,10 @@ export function createApi(manager: GatewayManager) {
         error: message,
       })
     }
+  })
+
+  app.get('/admin', (_req: Request, res: Response) => {
+    res.type('html').send(renderAdminPage())
   })
 
   app.get('/admin/overview', (_req: Request, res: Response) => {
