@@ -1,14 +1,12 @@
 import makeWASocket, {
-  useMultiFileAuthState,
   DisconnectReason,
   Browsers,
   type ConnectionState,
 } from '@whiskeysockets/baileys'
 import { Boom } from '@hapi/boom'
-import * as fs from 'fs'
-import * as path from 'path'
 import QRCode from 'qrcode'
 import { APP_CONFIG } from './config.js'
+import { AuthStore } from './auth-store.js'
 
 export type GatewayAccountStatus = {
   accountId: string
@@ -30,31 +28,10 @@ type ManagedAccount = {
 export class GatewayManager {
   private readonly accounts = new Map<string, ManagedAccount>()
   private readonly startingAccounts = new Set<string>()
+  private readonly authStore: AuthStore
 
-  constructor(private readonly sessionDir: string = APP_CONFIG.sessionDir) {}
-
-  private ensureDir(accountId?: string) {
-    const target = accountId
-      ? path.join(this.sessionDir, accountId)
-      : this.sessionDir
-
-    if (!fs.existsSync(target)) {
-      fs.mkdirSync(target, { recursive: true })
-    }
-
-    return target
-  }
-
-  private async getAuthState(accountId: string) {
-    const accountDir = this.ensureDir(accountId)
-    return useMultiFileAuthState(accountDir)
-  }
-
-  private removeSessionDir(accountId: string) {
-    const accountDir = path.join(this.sessionDir, accountId)
-    if (fs.existsSync(accountDir)) {
-      fs.rmSync(accountDir, { recursive: true, force: true })
-    }
+  constructor(sessionDir: string = APP_CONFIG.sessionDir) {
+    this.authStore = new AuthStore(sessionDir)
   }
 
   private getOrCreateAccount(accountId: string) {
@@ -83,7 +60,7 @@ export class GatewayManager {
   }
 
   private async saveQr(qr: string) {
-    this.ensureDir()
+    this.authStore.ensureBaseDir()
     await QRCode.toFile(APP_CONFIG.qrOutputPath, qr, {
       type: 'png',
       margin: 1,
@@ -102,121 +79,121 @@ export class GatewayManager {
     this.startingAccounts.add(accountId)
 
     try {
-      const { state, saveCreds } = await this.getAuthState(accountId)
+      const { state, saveCreds } = await this.authStore.load(accountId)
 
-    const sock = makeWASocket({
-      auth: state,
-      printQRInTerminal: false,
-      browser: Browsers.macOS('Desktop'),
-      syncFullHistory: false,
-      fireInitQueries: false,
-      markOnlineOnConnect: false,
-      qrTimeout: 60_000,
-      defaultQueryTimeoutMs: 60_000,
-    })
+      const sock = makeWASocket({
+        auth: state,
+        printQRInTerminal: false,
+        browser: Browsers.macOS('Desktop'),
+        syncFullHistory: false,
+        fireInitQueries: false,
+        markOnlineOnConnect: false,
+        qrTimeout: 60_000,
+        defaultQueryTimeoutMs: 60_000,
+      })
 
-    const account = this.getOrCreateAccount(accountId)
-    account.sock = sock
+      const account = this.getOrCreateAccount(accountId)
+      account.sock = sock
 
-    let pairingRequested = false
+      let pairingRequested = false
 
-    sock.ev.on('connection.update', (update: Partial<ConnectionState>) => {
-      const { connection, lastDisconnect, qr } = update
+      sock.ev.on('connection.update', (update: Partial<ConnectionState>) => {
+        const { connection, lastDisconnect, qr } = update
 
-      if (connection) {
-        console.log(`[${accountId}] connection.update → ${connection}`)
-        this.updateStatus(accountId, {
-          connected: connection === 'open',
-          lastConnection: connection,
-        })
-      }
-
-      if (qr) {
-        console.log(`[${accountId}] 📷 QR received`)
-        this.updateStatus(accountId, { lastQrAt: new Date().toISOString() })
-        void this.saveQr(qr)
-          .then(() => {
-            console.log(`[${accountId}] QR saved to ${APP_CONFIG.qrOutputPath}`)
+        if (connection) {
+          console.log(`[${accountId}] connection.update → ${connection}`)
+          this.updateStatus(accountId, {
+            connected: connection === 'open',
+            lastConnection: connection,
           })
-          .catch((error: unknown) => {
-            console.error(`[${accountId}] failed to save QR`, error)
-          })
-      }
+        }
 
-      if (connection === 'open') {
-        console.log(`[${accountId}] ✅ Connected to WhatsApp`)
-
-        this.updateStatus(accountId, {
-          connected: true,
-          registered: !!sock.authState.creds.registered,
-          phoneNumber: sock.authState.creds.me?.id ?? undefined,
-          platform: sock.authState.creds.platform,
-        })
-
-        if (!sock.authState.creds.registered && pairingNumber && !pairingRequested) {
-          pairingRequested = true
-          void sock.requestPairingCode(pairingNumber)
-            .then((code) => {
-              console.log(`[${accountId}] 🔐 Pairing code: ${code}`)
-              console.log(`[${accountId}] Use WhatsApp > Linked devices > Link with phone number`)
+        if (qr) {
+          console.log(`[${accountId}] 📷 QR received`)
+          this.updateStatus(accountId, { lastQrAt: new Date().toISOString() })
+          void this.saveQr(qr)
+            .then(() => {
+              console.log(`[${accountId}] QR saved to ${APP_CONFIG.qrOutputPath}`)
             })
             .catch((error: unknown) => {
-              pairingRequested = false
-              console.error(`[${accountId}] pairing code error`, error)
+              console.error(`[${accountId}] failed to save QR`, error)
             })
         }
-      }
 
-      if (connection === 'close') {
-        const shouldReconnect =
-          (lastDisconnect?.error as Boom)?.output?.statusCode !== DisconnectReason.loggedOut
+        if (connection === 'open') {
+          console.log(`[${accountId}] ✅ Connected to WhatsApp`)
 
-        console.log(
-          `[${accountId}] 🔌 Connection closed: ${lastDisconnect?.error}` +
-            ` | Reconnecting: ${shouldReconnect}`
-        )
+          this.updateStatus(accountId, {
+            connected: true,
+            registered: !!sock.authState.creds.registered,
+            phoneNumber: sock.authState.creds.me?.id ?? undefined,
+            platform: sock.authState.creds.platform,
+          })
 
+          if (!sock.authState.creds.registered && pairingNumber && !pairingRequested) {
+            pairingRequested = true
+            void sock.requestPairingCode(pairingNumber)
+              .then((code) => {
+                console.log(`[${accountId}] 🔐 Pairing code: ${code}`)
+                console.log(`[${accountId}] Use WhatsApp > Linked devices > Link with phone number`)
+              })
+              .catch((error: unknown) => {
+                pairingRequested = false
+                console.error(`[${accountId}] pairing code error`, error)
+              })
+          }
+        }
+
+        if (connection === 'close') {
+          const shouldReconnect =
+            (lastDisconnect?.error as Boom)?.output?.statusCode !== DisconnectReason.loggedOut
+
+          console.log(
+            `[${accountId}] 🔌 Connection closed: ${lastDisconnect?.error}` +
+              ` | Reconnecting: ${shouldReconnect}`
+          )
+
+          this.updateStatus(accountId, {
+            connected: false,
+            registered: !!sock.authState.creds.registered,
+            phoneNumber: sock.authState.creds.me?.id ?? undefined,
+            platform: sock.authState.creds.platform,
+          })
+
+          if (shouldReconnect) {
+            void this.startAccount(accountId, pairingNumber)
+          } else {
+            console.warn(`[${accountId}] ⚠️ Session logged out. Removing session folder for re-pair.`)
+            this.authStore.remove(accountId)
+          }
+        }
+      })
+
+      sock.ev.on('creds.update', async () => {
+        await saveCreds()
         this.updateStatus(accountId, {
-          connected: false,
           registered: !!sock.authState.creds.registered,
           phoneNumber: sock.authState.creds.me?.id ?? undefined,
           platform: sock.authState.creds.platform,
         })
-
-        if (shouldReconnect) {
-          void this.startAccount(accountId, pairingNumber)
-        } else {
-          console.warn(`[${accountId}] ⚠️ Session logged out. Removing session folder for re-pair.`)
-          this.removeSessionDir(accountId)
-        }
-      }
-    })
-
-    sock.ev.on('creds.update', async () => {
-      await saveCreds()
-      this.updateStatus(accountId, {
-        registered: !!sock.authState.creds.registered,
-        phoneNumber: sock.authState.creds.me?.id ?? undefined,
-        platform: sock.authState.creds.platform,
       })
-    })
 
-    sock.ev.on('messages.upsert', ({ messages }) => {
-      for (const msg of messages) {
-        const fromMe = msg.key.fromMe
-        const jid = msg.key.remoteJid
-        const body =
-          msg.message?.conversation ||
-          msg.message?.extendedTextMessage?.text ||
-          ''
+      sock.ev.on('messages.upsert', ({ messages }) => {
+        for (const msg of messages) {
+          const fromMe = msg.key.fromMe
+          const jid = msg.key.remoteJid
+          const body =
+            msg.message?.conversation ||
+            msg.message?.extendedTextMessage?.text ||
+            ''
 
-        if (!fromMe && jid && body) {
-          console.log(`[${accountId}] 📩 ${jid}: ${body}`)
+          if (!fromMe && jid && body) {
+            console.log(`[${accountId}] 📩 ${jid}: ${body}`)
+          }
         }
-      }
-    })
+      })
 
-    return sock
+      return sock
     } finally {
       this.startingAccounts.delete(accountId)
     }
@@ -241,12 +218,8 @@ export class GatewayManager {
   listKnownAccountIds() {
     const ids = new Set<string>(this.accounts.keys())
 
-    if (fs.existsSync(this.sessionDir)) {
-      for (const entry of fs.readdirSync(this.sessionDir, { withFileTypes: true })) {
-        if (entry.isDirectory()) {
-          ids.add(entry.name)
-        }
-      }
+    for (const accountId of this.authStore.listAccountIds()) {
+      ids.add(accountId)
     }
 
     return Array.from(ids).sort()

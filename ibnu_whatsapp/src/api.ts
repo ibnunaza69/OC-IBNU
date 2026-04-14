@@ -1,6 +1,8 @@
 import express, { Request, Response, NextFunction } from 'express'
 import { APP_CONFIG } from './config.js'
 import { GatewayManager } from './gateway-manager.js'
+import type { AdminOverviewResponse } from './admin-contract.js'
+import type { GatewayWebhookEnvelope } from './webhook-contract.js'
 
 interface SendRequest {
   accountId?: string
@@ -120,6 +122,46 @@ export function createApi(manager: GatewayManager) {
     }
   })
 
+  app.get('/admin/overview', (_req: Request, res: Response) => {
+    const response: AdminOverviewResponse = {
+      service: {
+        name: 'ibnu_whatsapp',
+        version: '0.1.0',
+        uptimeSec: process.uptime(),
+      },
+      config: {
+        defaultAccountId: APP_CONFIG.defaultAccountId,
+        webhookPath: APP_CONFIG.webhookPath,
+        sessionDir: APP_CONFIG.sessionDir,
+      },
+      accounts: manager.listStatuses(),
+    }
+
+    res.json(response)
+  })
+
+  app.get('/admin/contracts', (_req: Request, res: Response) => {
+    const sampleWebhook: GatewayWebhookEnvelope = {
+      event: 'gateway.connection.update',
+      accountId: APP_CONFIG.defaultAccountId,
+      timestamp: new Date().toISOString(),
+      data: {
+        connection: 'connecting',
+      },
+    }
+
+    res.json({
+      webhook: {
+        path: APP_CONFIG.webhookPath,
+        sampleEnvelope: sampleWebhook,
+      },
+      admin: {
+        overviewPath: '/admin/overview',
+        contractsPath: '/admin/contracts',
+      },
+    })
+  })
+
   app.post(APP_CONFIG.webhookPath, (req: Request<{}, {}, WebhookPayload>, res: Response) => {
     const payload = req.body
     console.log('[webhook] received', payload)
@@ -128,6 +170,10 @@ export function createApi(manager: GatewayManager) {
       success: true,
       received: true,
       path: APP_CONFIG.webhookPath,
+      contract: {
+        event: payload?.event ?? 'unknown',
+        timestamp: new Date().toISOString(),
+      },
     })
   })
 
