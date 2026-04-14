@@ -9,5 +9,9 @@ export const APP_CONFIG = {
   webhookPath: process.env.WEBHOOK_PATH || '/webhook',
   webhookUrl: process.env.WEBHOOK_URL || '',
   webhookSecret: process.env.WEBHOOK_SECRET || '',
+  apiKeys: (process.env.API_KEYS || '')
+    .split(',')
+    .map((key) => key.trim())
+    .filter(Boolean),
   accountRegistryPath: path.resolve('./data/accounts.json'),
 } as const

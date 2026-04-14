@@ -38,6 +38,7 @@ Variabel penting:
 - `DEFAULT_ACCOUNT_ID`
 - `WA_PAIRING_NUMBER`
 - `WEBHOOK_PATH`
+- `API_KEYS` (opsional; kalau kosong, middleware API key dimatikan)
 
 ## Endpoint utama
 
@@ -95,12 +96,16 @@ Event yang sudah disiapkan:
 - `GET /admin/overview`
 - `GET /admin/contracts`
 
+### Security headers
+- API key: `x-api-key`
+- Webhook signature: `x-webhook-signature`
+
 ## Contoh curl
 
 ```bash
-curl http://localhost:8080/health
-curl http://localhost:8080/accounts
-curl http://localhost:8080/admin/overview
+curl -H 'x-api-key: dev-key-123' http://localhost:8080/health
+curl -H 'x-api-key: dev-key-123' http://localhost:8080/accounts
+curl -H 'x-api-key: dev-key-123' http://localhost:8080/admin/overview
 
 curl -X POST http://localhost:8080/accounts \
   -H "Content-Type: application/json" \

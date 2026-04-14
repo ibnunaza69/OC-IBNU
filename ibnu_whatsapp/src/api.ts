@@ -4,6 +4,8 @@ import { GatewayManager } from './gateway-manager.js'
 import type { AdminOverviewResponse } from './admin-contract.js'
 import type { GatewayWebhookEnvelope } from './webhook-contract.js'
 import { renderAdminPage } from './admin-page.js'
+import { apiKeyMiddleware } from './api-key-middleware.js'
+import { requestLogger } from './request-logger.js'
 
 interface SendRequest {
   accountId?: string
@@ -28,7 +30,9 @@ interface WebhookPayload {
 export function createApi(manager: GatewayManager) {
   const app = express()
 
+  app.use(requestLogger())
   app.use(express.json())
+  app.use(apiKeyMiddleware(APP_CONFIG.apiKeys))
 
   app.get('/health', (_req: Request, res: Response) => {
     res.json({
@@ -222,6 +226,10 @@ export function createApi(manager: GatewayManager) {
         targetUrl: APP_CONFIG.webhookUrl || null,
         sampleEnvelope: sampleWebhook,
         signatureHeader: 'x-webhook-signature',
+      },
+      security: {
+        apiKeyHeader: 'x-api-key',
+        apiKeyCount: APP_CONFIG.apiKeys.length,
       },
       admin: {
         overviewPath: '/admin/overview',
