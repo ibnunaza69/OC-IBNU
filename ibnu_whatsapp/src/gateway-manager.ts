@@ -5,8 +5,10 @@ import makeWASocket, {
 } from '@whiskeysockets/baileys'
 import { Boom } from '@hapi/boom'
 import QRCode from 'qrcode'
+import * as path from 'path'
 import { APP_CONFIG } from './config.js'
 import { AuthStore } from './auth-store.js'
+import { SqliteAuthStore } from './sqlite-auth-store.js'
 import { SendQueue } from './send-queue.js'
 import { AccountRegistry } from './account-registry.js'
 import { GatewayEventBus } from './event-bus.js'
@@ -38,6 +40,7 @@ export class GatewayManager {
   private readonly accounts = new Map<string, ManagedAccount>()
   private readonly startingAccounts = new Set<string>()
   private readonly authStore: AuthStore
+  private readonly sqliteAuthStore: SqliteAuthStore
   private readonly sendQueue = new SendQueue()
 
   constructor(
@@ -46,6 +49,7 @@ export class GatewayManager {
     private readonly eventBus: GatewayEventBus = new GatewayEventBus()
   ) {
     this.authStore = new AuthStore(sessionDir)
+    this.sqliteAuthStore = new SqliteAuthStore(path.join(APP_CONFIG.sessionDir, 'auth.sqlite'))
   }
 
   getEventBus() {
@@ -118,7 +122,7 @@ export class GatewayManager {
     })
 
     try {
-      const { state, saveCreds } = await this.authStore.load(accountId)
+      const { state, saveCreds } = await this.sqliteAuthStore.load(accountId)
 
       const sock = makeWASocket({
         auth: state,
