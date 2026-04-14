@@ -353,6 +353,17 @@ export class GatewayManager {
     }
   }
 
+  async resetSession(accountId: string) {
+    await this.stopAccount(accountId)
+    this.authStore.reset(accountId)
+    this.registry.upsert(accountId, { state: 'reset' })
+
+    return {
+      accountId,
+      reset: true,
+    }
+  }
+
   async removeAccount(accountId: string) {
     await this.stopAccount(accountId)
     this.accounts.delete(accountId)

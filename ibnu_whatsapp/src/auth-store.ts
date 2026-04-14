@@ -36,6 +36,11 @@ export class AuthStore {
     }
   }
 
+  reset(accountId: string) {
+    this.remove(accountId)
+    this.ensureAccountDir(accountId)
+  }
+
   listAccountIds() {
     this.ensureBaseDir()
     return fs.readdirSync(this.baseDir, { withFileTypes: true })

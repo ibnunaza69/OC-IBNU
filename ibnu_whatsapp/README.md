@@ -50,6 +50,7 @@ Variabel penting:
 
 ### Account control
 - `POST /accounts`
+- `POST /accounts/:accountId/reset-session`
 - `POST /accounts/:accountId/stop`
 - `POST /accounts/:accountId/restart`
 - `DELETE /accounts/:accountId`
@@ -105,6 +106,7 @@ curl -X POST http://localhost:8080/accounts \
   -H "Content-Type: application/json" \
   -d '{"accountId":"acc-2","pairingNumber":"6281234567890"}'
 
+curl -X POST http://localhost:8080/accounts/acc-2/reset-session
 curl -X POST http://localhost:8080/accounts/acc-2/stop
 curl -X POST http://localhost:8080/accounts/acc-2/restart \
   -H "Content-Type: application/json" \

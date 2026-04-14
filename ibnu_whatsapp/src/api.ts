@@ -130,6 +130,19 @@ export function createApi(manager: GatewayManager) {
     }
   })
 
+  app.post('/accounts/:accountId/reset-session', async (req: Request, res: Response) => {
+    const rawAccountId = req.params.accountId
+    const accountId = Array.isArray(rawAccountId) ? rawAccountId[0] : rawAccountId
+
+    try {
+      const result = await manager.resetSession(accountId)
+      return res.json({ success: true, ...result })
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      return res.status(500).json({ success: false, accountId, error: message })
+    }
+  })
+
   app.delete('/accounts/:accountId', async (req: Request, res: Response) => {
     const rawAccountId = req.params.accountId
     const accountId = Array.isArray(rawAccountId) ? rawAccountId[0] : rawAccountId
@@ -215,6 +228,7 @@ export function createApi(manager: GatewayManager) {
         contractsPath: '/admin/contracts',
       },
       accounts: {
+        resetSessionPath: '/accounts/:accountId/reset-session',
         stopPath: '/accounts/:accountId/stop',
         restartPath: '/accounts/:accountId/restart',
         deletePath: '/accounts/:accountId',
