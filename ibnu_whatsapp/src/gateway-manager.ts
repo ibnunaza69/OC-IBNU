@@ -107,6 +107,7 @@ export class GatewayManager {
     this.registry.upsert(accountId, {
       pairingNumber,
       lastStartedAt: new Date().toISOString(),
+      state: 'starting',
     })
 
     this.emit({
@@ -144,6 +145,10 @@ export class GatewayManager {
             connected: connection === 'open',
             lastConnection: connection,
           })
+
+          if (connection === 'open') {
+            this.registry.upsert(accountId, { state: 'running' })
+          }
 
           const data: GatewayConnectionUpdateData = {
             connection,
@@ -221,6 +226,8 @@ export class GatewayManager {
             phoneNumber: sock.authState.creds.me?.id ?? undefined,
             platform: sock.authState.creds.platform,
           })
+
+          this.registry.upsert(accountId, { state: 'stopped' })
 
           if (shouldReconnect) {
             void this.startAccount(accountId, pairingNumber)
@@ -312,6 +319,50 @@ export class GatewayManager {
     }
 
     return Array.from(ids).sort()
+  }
+
+  async stopAccount(accountId: string) {
+    const account = this.accounts.get(accountId)
+    if (account?.sock) {
+      try {
+        account.sock.end(undefined)
+      } catch {
+        // ignore shutdown errors
+      }
+      account.sock = undefined
+    }
+
+    this.updateStatus(accountId, {
+      connected: false,
+      lastConnection: 'stopped',
+    })
+    this.registry.upsert(accountId, { state: 'stopped' })
+
+    return {
+      accountId,
+      stopped: true,
+    }
+  }
+
+  async restartAccount(accountId: string, pairingNumber?: string) {
+    await this.stopAccount(accountId)
+    await this.startAccount(accountId, pairingNumber)
+    return {
+      accountId,
+      restarted: true,
+    }
+  }
+
+  async removeAccount(accountId: string) {
+    await this.stopAccount(accountId)
+    this.accounts.delete(accountId)
+    this.authStore.remove(accountId)
+    this.registry.remove(accountId)
+
+    return {
+      accountId,
+      removed: true,
+    }
   }
 
   async sendText(accountId: string, jid: string, text: string) {

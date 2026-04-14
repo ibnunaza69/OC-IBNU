@@ -50,6 +50,9 @@ Variabel penting:
 
 ### Account control
 - `POST /accounts`
+- `POST /accounts/:accountId/stop`
+- `POST /accounts/:accountId/restart`
+- `DELETE /accounts/:accountId`
 
 Body contoh:
 ```json
@@ -74,6 +77,10 @@ Body contoh:
 ### Webhook
 - `POST /webhook`
 - outbound dispatch event ke `WEBHOOK_URL` bila di-set
+- outbound request membawa:
+  - `x-webhook-secret`
+  - `x-webhook-signature` (HMAC SHA-256)
+- retry dasar: 3 attempt
 
 Event yang sudah disiapkan:
 - `gateway.started`
@@ -98,6 +105,12 @@ curl -X POST http://localhost:8080/accounts \
   -H "Content-Type: application/json" \
   -d '{"accountId":"acc-2","pairingNumber":"6281234567890"}'
 
+curl -X POST http://localhost:8080/accounts/acc-2/stop
+curl -X POST http://localhost:8080/accounts/acc-2/restart \
+  -H "Content-Type: application/json" \
+  -d '{"pairingNumber":"6281234567890"}'
+curl -X DELETE http://localhost:8080/accounts/acc-2
+
 curl -X POST http://localhost:8080/send \
   -H "Content-Type: application/json" \
   -d '{"accountId":"default","jid":"6281234567890@s.whatsapp.net","text":"Halo dari gateway"}'
@@ -120,6 +133,6 @@ curl -X POST http://localhost:8080/send \
 ## Next recommended steps
 1. persistent DB-backed auth store
 2. admin dashboard frontend terpisah
-3. retry policy + rate-limit layer yang lebih tegas
-4. outbound webhook retry/signature hardening
+3. persistent DB-backed auth/session store
+4. richer admin dashboard frontend
 5. pembuktian pairing dari environment lain

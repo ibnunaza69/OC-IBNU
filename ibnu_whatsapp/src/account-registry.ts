@@ -7,6 +7,7 @@ export interface AccountRegistryEntry {
   updatedAt: string
   pairingNumber?: string
   lastStartedAt?: string
+  state?: 'created' | 'starting' | 'running' | 'stopped' | 'removed'
 }
 
 export class AccountRegistry {
@@ -56,6 +57,7 @@ export class AccountRegistry {
         accountId,
         createdAt: now,
         updatedAt: now,
+        state: 'created',
         ...patch,
       }
       entries.push(created)
@@ -72,5 +74,10 @@ export class AccountRegistry {
     entries[index] = updated
     this.writeAll(entries)
     return updated
+  }
+
+  remove(accountId: string) {
+    const entries = this.readAll().filter((entry) => entry.accountId !== accountId)
+    this.writeAll(entries)
   }
 }

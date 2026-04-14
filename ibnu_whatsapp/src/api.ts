@@ -16,6 +16,10 @@ interface StartAccountRequest {
   pairingNumber?: string
 }
 
+interface AccountActionRequest {
+  pairingNumber?: string
+}
+
 interface WebhookPayload {
   event?: string
   data?: unknown
@@ -99,6 +103,46 @@ export function createApi(manager: GatewayManager) {
     }
   })
 
+  app.post('/accounts/:accountId/stop', async (req: Request, res: Response) => {
+    const rawAccountId = req.params.accountId
+    const accountId = Array.isArray(rawAccountId) ? rawAccountId[0] : rawAccountId
+
+    try {
+      const result = await manager.stopAccount(accountId)
+      return res.json({ success: true, ...result })
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      return res.status(500).json({ success: false, accountId, error: message })
+    }
+  })
+
+  app.post('/accounts/:accountId/restart', async (req: Request<{ accountId: string }, {}, AccountActionRequest>, res: Response) => {
+    const rawAccountId = req.params.accountId
+    const accountId = Array.isArray(rawAccountId) ? rawAccountId[0] : rawAccountId
+    const { pairingNumber } = req.body
+
+    try {
+      const result = await manager.restartAccount(accountId, pairingNumber)
+      return res.json({ success: true, ...result })
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      return res.status(500).json({ success: false, accountId, error: message })
+    }
+  })
+
+  app.delete('/accounts/:accountId', async (req: Request, res: Response) => {
+    const rawAccountId = req.params.accountId
+    const accountId = Array.isArray(rawAccountId) ? rawAccountId[0] : rawAccountId
+
+    try {
+      const result = await manager.removeAccount(accountId)
+      return res.json({ success: true, ...result })
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      return res.status(500).json({ success: false, accountId, error: message })
+    }
+  })
+
   app.post('/send', async (req: Request<{}, {}, SendRequest>, res: Response) => {
     const accountId = req.body.accountId || APP_CONFIG.defaultAccountId
     const { jid, text } = req.body
@@ -164,10 +208,16 @@ export function createApi(manager: GatewayManager) {
         path: APP_CONFIG.webhookPath,
         targetUrl: APP_CONFIG.webhookUrl || null,
         sampleEnvelope: sampleWebhook,
+        signatureHeader: 'x-webhook-signature',
       },
       admin: {
         overviewPath: '/admin/overview',
         contractsPath: '/admin/contracts',
+      },
+      accounts: {
+        stopPath: '/accounts/:accountId/stop',
+        restartPath: '/accounts/:accountId/restart',
+        deletePath: '/accounts/:accountId',
       },
     })
   })

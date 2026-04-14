@@ -37,6 +37,7 @@ export function renderAdminPage() {
         <p><a href="/admin/overview">/admin/overview</a></p>
         <p><a href="/admin/contracts">/admin/contracts</a></p>
         <p><a href="/accounts">/accounts</a></p>
+        <p class="muted">Account ops via API: stop / restart / delete</p>
       </div>
     </div>
 
