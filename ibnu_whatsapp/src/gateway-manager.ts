@@ -14,6 +14,7 @@ import { AccountRegistry } from './account-registry.js'
 import { GatewayEventBus } from './event-bus.js'
 import type {
   GatewayConnectionUpdateData,
+  GatewayErrorData,
   GatewayMessageReceivedData,
   GatewayQrReceivedData,
   GatewayWebhookEnvelope,
@@ -91,6 +92,27 @@ export class GatewayManager {
       ...patch,
     }
     return account.status
+  }
+
+  private emitError(accountId: string, code: string, message: string, options?: {
+    stage?: string
+    retrying?: boolean
+    details?: string
+  }) {
+    const data: GatewayErrorData = {
+      code,
+      message,
+      stage: options?.stage,
+      retrying: options?.retrying,
+      details: options?.details,
+    }
+
+    this.emit({
+      event: 'gateway.error',
+      accountId,
+      timestamp: new Date().toISOString(),
+      data,
+    })
   }
 
   private async saveQr(qr: string) {
@@ -191,7 +213,15 @@ export class GatewayManager {
               })
             })
             .catch((error: unknown) => {
+              const message = error instanceof Error ? error.message : String(error)
               console.error(`[${accountId}] failed to save QR`, error)
+              this.updateStatus(accountId, {
+                lastError: message,
+              })
+              this.emitError(accountId, 'qr_save_failed', message, {
+                stage: 'qr',
+                retrying: false,
+              })
             })
         }
 
@@ -214,7 +244,15 @@ export class GatewayManager {
               })
               .catch((error: unknown) => {
                 pairingRequested = false
+                const message = error instanceof Error ? error.message : String(error)
                 console.error(`[${accountId}] pairing code error`, error)
+                this.updateStatus(accountId, {
+                  lastError: message,
+                })
+                this.emitError(accountId, 'pairing_code_failed', message, {
+                  stage: 'pairing',
+                  retrying: false,
+                })
               })
           }
         }
@@ -240,7 +278,13 @@ export class GatewayManager {
             lastConnectionAt: new Date().toISOString(),
           })
 
-          this.registry.upsert(accountId, { state: 'stopped' })
+          this.registry.upsert(accountId, { state: shouldReconnect ? 'reconnecting' : 'stopped' })
+
+          this.emitError(accountId, 'connection_closed', disconnectReason, {
+            stage: 'connection',
+            retrying: shouldReconnect,
+            details: String(lastDisconnect?.error ?? ''),
+          })
 
           if (shouldReconnect) {
             void this.startAccount(accountId, pairingNumber)
@@ -300,6 +344,20 @@ export class GatewayManager {
       })
 
       return sock
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      this.updateStatus(accountId, {
+        connected: false,
+        lastError: message,
+        lastConnection: 'start_failed',
+        lastConnectionAt: new Date().toISOString(),
+      })
+      this.registry.upsert(accountId, { state: 'error' })
+      this.emitError(accountId, 'start_failed', message, {
+        stage: 'startup',
+        retrying: false,
+      })
+      throw error
     } finally {
       this.startingAccounts.delete(accountId)
     }
@@ -396,14 +454,36 @@ export class GatewayManager {
     return this.sendQueue.enqueue(accountId, async () => {
       const sock = this.getSock(accountId)
       if (!sock) {
-        throw new Error(`Account '${accountId}' is not initialized`)
+        const message = `Account '${accountId}' is not initialized`
+        this.updateStatus(accountId, { lastError: message })
+        this.emitError(accountId, 'send_failed', message, {
+          stage: 'send',
+          retrying: false,
+        })
+        throw new Error(message)
       }
 
       if (!sock.authState.creds.registered) {
-        throw new Error(`Account '${accountId}' is not connected to WhatsApp`)
+        const message = `Account '${accountId}' is not connected to WhatsApp`
+        this.updateStatus(accountId, { lastError: message })
+        this.emitError(accountId, 'send_failed', message, {
+          stage: 'send',
+          retrying: false,
+        })
+        throw new Error(message)
       }
 
-      return sock.sendMessage(jid, { text })
+      try {
+        return await sock.sendMessage(jid, { text })
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error)
+        this.updateStatus(accountId, { lastError: message })
+        this.emitError(accountId, 'send_failed', message, {
+          stage: 'send',
+          retrying: false,
+        })
+        throw error
+      }
     })
   }
 }

@@ -9,7 +9,7 @@ export interface AccountRegistryEntry {
   updatedAt: string
   pairingNumber?: string
   lastStartedAt?: string
-  state?: 'created' | 'starting' | 'running' | 'stopped' | 'removed' | 'reset'
+  state?: 'created' | 'starting' | 'running' | 'reconnecting' | 'stopped' | 'error' | 'removed' | 'reset'
 }
 
 export class AccountRegistry {

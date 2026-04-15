@@ -41,6 +41,7 @@ async function main() {
     console.log(`\n🌐 REST API listening on http://localhost:${APP_CONFIG.port}`)
     console.log(`   GET  /health               — gateway health`)
     console.log(`   GET  /status               — all account statuses`)
+    console.log(`   GET  /diagnostics          — service + registry diagnostics`)
     console.log(`   GET  /accounts             — list known accounts + registry`)
     console.log(`   POST /accounts             — start/init account`)
     console.log(`   POST /send                 — send message`)

@@ -48,6 +48,8 @@ Variabel penting:
 - `GET /accounts`
 - `GET /accounts/:accountId`
   - sekarang juga expose metadata registry account
+- `GET /diagnostics`
+  - ringkasan service/runtime + registry + account error state untuk troubleshooting
 
 ### Account control
 - `POST /accounts`
@@ -90,11 +92,13 @@ Event yang sudah disiapkan:
 - `gateway.qr.received`
 - `gateway.message.received`
 - `gateway.creds.updated`
+- `gateway.error`
 
 ### Admin
 - `GET /admin`
 - `GET /admin/overview`
 - `GET /admin/contracts`
+- `GET /diagnostics`
 
 ### Security headers
 - API key: `x-api-key`
@@ -106,6 +110,7 @@ Event yang sudah disiapkan:
 curl -H 'x-api-key: dev-key-123' http://localhost:8080/health
 curl -H 'x-api-key: dev-key-123' http://localhost:8080/accounts
 curl -H 'x-api-key: dev-key-123' http://localhost:8080/admin/overview
+curl -H 'x-api-key: dev-key-123' http://localhost:8080/diagnostics
 
 curl -X POST http://localhost:8080/accounts \
   -H "Content-Type: application/json" \

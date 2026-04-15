@@ -59,6 +59,32 @@ export function createApi(manager: GatewayManager) {
     })
   })
 
+  app.get('/diagnostics', (_req: Request, res: Response) => {
+    const accounts = manager.listStatuses()
+    const registry = manager.getRegistry().list()
+
+    res.json({
+      service: {
+        uptimeSec: process.uptime(),
+        defaultAccountId: APP_CONFIG.defaultAccountId,
+        sessionDir: APP_CONFIG.sessionDir,
+        registryPath: APP_CONFIG.accountRegistryPath,
+        qrOutputPath: APP_CONFIG.qrOutputPath,
+        webhookPath: APP_CONFIG.webhookPath,
+        webhookTargetConfigured: Boolean(APP_CONFIG.webhookUrl),
+        apiKeyEnabled: APP_CONFIG.apiKeys.length > 0,
+      },
+      summary: {
+        accountCount: accounts.length,
+        connectedCount: accounts.filter((account) => account.connected).length,
+        registeredCount: accounts.filter((account) => account.registered).length,
+        accountsWithErrors: accounts.filter((account) => Boolean(account.lastError)).length,
+      },
+      accounts,
+      registry,
+    })
+  })
+
   app.get('/accounts', (_req: Request, res: Response) => {
     res.json({
       defaultAccountId: APP_CONFIG.defaultAccountId,
@@ -246,6 +272,7 @@ export function createApi(manager: GatewayManager) {
       admin: {
         overviewPath: '/admin/overview',
         contractsPath: '/admin/contracts',
+        diagnosticsPath: '/diagnostics',
       },
       accounts: {
         resetSessionPath: '/accounts/:accountId/reset-session',

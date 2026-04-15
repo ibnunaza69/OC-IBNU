@@ -30,3 +30,11 @@ export interface GatewayMessageReceivedData {
   jid: string
   text: string
 }
+
+export interface GatewayErrorData {
+  code: string
+  message: string
+  stage?: string
+  retrying?: boolean
+  details?: string
+}
