@@ -7,6 +7,7 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "ts-node src/index.ts",
+    "repro": "ts-node src/repro-baileys.ts",
     "clean": "rm -rf dist"
   },
   "dependencies": {

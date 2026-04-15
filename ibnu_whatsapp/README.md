@@ -25,6 +25,26 @@ npm run build
 npm start
 ```
 
+## Minimal Baileys repro
+
+Untuk memisahkan masalah Baileys/runtime dari layer gateway utama, jalankan repro minimal ini:
+
+```bash
+BAILEYS_REPRO_PAIRING_NUMBER=6281222627969 npm run repro
+```
+
+Opsional:
+- `BAILEYS_REPRO_SESSION_DIR=./sessions/repro`
+- `BAILEYS_REPRO_QR_PATH=./sessions/repro-qr.png`
+- `PREFER_IPV4=true`
+
+Repro ini hanya fokus pada:
+- `connection.update`
+- QR save
+- pairing code request
+- disconnect code/message/detail
+- auth creds summary
+
 Default API server:
 - `http://localhost:8080`
 
