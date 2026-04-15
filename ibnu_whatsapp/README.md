@@ -74,6 +74,35 @@ Default path v2 dipisah per profile agar sesi tiap eksperimen tidak saling menim
 - session: `./sessions/repro-v2/<profile>`
 - QR: `./sessions/repro-v2/<profile>/qr.png`
 
+## Baileys repro v3 (mode switch + knob override)
+
+Versi v3 dipakai untuk eksperimen yang lebih tajam: memisahkan mode pairing-only vs QR-only, sambil tetap bisa override beberapa socket option satu per satu.
+
+Contoh pairing-only:
+
+```bash
+BAILEYS_REPRO_MODE=pairing-only BAILEYS_REPRO_PROFILE=mac-desktop BAILEYS_REPRO_PAIRING_NUMBER=6281222627969 npm run repro:v3
+```
+
+Contoh QR-only:
+
+```bash
+BAILEYS_REPRO_MODE=qr-only BAILEYS_REPRO_PROFILE=mac-desktop npm run repro:v3
+```
+
+Env tambahan v3:
+- `BAILEYS_REPRO_MODE=auto|pairing-only|qr-only`
+- `BAILEYS_REPRO_SYNC_FULL_HISTORY=true|false`
+- `BAILEYS_REPRO_FIRE_INIT_QUERIES=true|false`
+- `BAILEYS_REPRO_MARK_ONLINE=true|false`
+- `BAILEYS_REPRO_QR_TIMEOUT_MS=<number>`
+- `BAILEYS_REPRO_DEFAULT_QUERY_TIMEOUT_MS=<number>`
+- `BAILEYS_REPRO_CONNECT_TIMEOUT_MS=<number>`
+
+Default path v3 dipisah per kombinasi profile+mode:
+- session: `./sessions/repro-v3/<profile>-<mode>`
+- QR: `./sessions/repro-v3/<profile>-<mode>/qr.png`
+
 Default API server:
 - `http://localhost:8080`
 

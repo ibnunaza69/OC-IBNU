@@ -9,6 +9,7 @@
     "dev": "ts-node src/index.ts",
     "repro": "ts-node src/repro-baileys.ts",
     "repro:v2": "ts-node src/repro-baileys-v2.ts",
+    "repro:v3": "ts-node src/repro-baileys-v3.ts",
     "clean": "rm -rf dist"
   },
   "dependencies": {
