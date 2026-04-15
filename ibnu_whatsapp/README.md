@@ -99,6 +99,7 @@ Event yang sudah disiapkan:
 - `GET /admin/overview`
 - `GET /admin/contracts`
 - `GET /diagnostics`
+- admin page sekarang menampilkan status reconnect/error dan quick actions untuk stop/restart/reset/remove per account
 
 ### Security headers
 - API key: `x-api-key`
@@ -143,8 +144,7 @@ curl -X POST http://localhost:8080/send \
 - `src/event-bus.ts` → internal event bus
 
 ## Next recommended steps
-1. persistent DB-backed auth store
-2. admin dashboard frontend terpisah
-3. persistent DB-backed auth/session store
-4. richer admin dashboard frontend
-5. pembuktian pairing dari environment lain
+1. richer diagnostic detail per account
+2. audit race condition reconnect vs manual lifecycle action di runtime nyata
+3. admin dashboard frontend terpisah
+4. pembuktian pairing dari environment lain

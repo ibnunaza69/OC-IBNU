@@ -38,6 +38,7 @@ type ManagedSock = ReturnType<typeof makeWASocket>
 type ManagedAccount = {
   sock?: ManagedSock
   status: GatewayAccountStatus
+  stopping?: boolean
 }
 
 export class GatewayManager {
@@ -78,11 +79,16 @@ export class GatewayManager {
         connected: false,
         registered: false,
       },
+      stopping: false,
     }
 
     this.accounts.set(accountId, created)
     this.registry.upsert(accountId)
     return created
+  }
+
+  private hasKnownAccount(accountId: string) {
+    return Boolean(this.accounts.get(accountId)) || Boolean(this.registry.get(accountId))
   }
 
   private updateStatus(accountId: string, patch: Partial<GatewayAccountStatus>) {
@@ -161,6 +167,7 @@ export class GatewayManager {
       })
 
       const account = this.getOrCreateAccount(accountId)
+      account.stopping = false
       account.sock = sock
 
       let pairingRequested = false
@@ -286,7 +293,7 @@ export class GatewayManager {
             details: String(lastDisconnect?.error ?? ''),
           })
 
-          if (shouldReconnect) {
+          if (shouldReconnect && !account.stopping) {
             void this.startAccount(accountId, pairingNumber)
           } else {
             console.warn(`[${accountId}] ⚠️ Session logged out. Removing auth data for re-pair.`)
@@ -395,6 +402,26 @@ export class GatewayManager {
 
   async stopAccount(accountId: string) {
     const account = this.accounts.get(accountId)
+    const registry = this.registry.get(accountId)
+
+    if (!account && !registry) {
+      throw new Error(`Account '${accountId}' not found`)
+    }
+
+    if (account?.stopping) {
+      return {
+        accountId,
+        stopped: false,
+        alreadyStopping: true,
+      }
+    }
+
+    if (account) {
+      account.stopping = true
+    }
+
+    const hadActiveSocket = Boolean(account?.sock)
+
     if (account?.sock) {
       try {
         account.sock.end(undefined)
@@ -413,32 +440,55 @@ export class GatewayManager {
     return {
       accountId,
       stopped: true,
+      hadActiveSocket,
     }
   }
 
   async restartAccount(accountId: string, pairingNumber?: string) {
-    await this.stopAccount(accountId)
+    if (!this.hasKnownAccount(accountId)) {
+      throw new Error(`Account '${accountId}' not found`)
+    }
+
+    const stopResult = await this.stopAccount(accountId)
     await this.startAccount(accountId, pairingNumber)
     return {
       accountId,
       restarted: true,
+      previousStop: stopResult,
     }
   }
 
   async resetSession(accountId: string) {
-    await this.stopAccount(accountId)
+    if (!this.hasKnownAccount(accountId)) {
+      throw new Error(`Account '${accountId}' not found`)
+    }
+
+    const stopResult = await this.stopAccount(accountId)
     this.sqliteAuthStore.reset(accountId)
     this.authStore.reset(accountId)
     this.registry.upsert(accountId, { state: 'reset' })
+    this.updateStatus(accountId, {
+      connected: false,
+      registered: false,
+      phoneNumber: undefined,
+      platform: undefined,
+      lastConnection: 'reset',
+      lastQrAt: undefined,
+    })
 
     return {
       accountId,
       reset: true,
+      previousStop: stopResult,
     }
   }
 
   async removeAccount(accountId: string) {
-    await this.stopAccount(accountId)
+    if (!this.hasKnownAccount(accountId)) {
+      throw new Error(`Account '${accountId}' not found`)
+    }
+
+    const stopResult = await this.stopAccount(accountId)
     this.accounts.delete(accountId)
     this.sqliteAuthStore.remove(accountId)
     this.authStore.remove(accountId)
@@ -447,6 +497,7 @@ export class GatewayManager {
     return {
       accountId,
       removed: true,
+      previousStop: stopResult,
     }
   }
 
