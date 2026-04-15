@@ -18,7 +18,18 @@ export interface AdminOverviewResponse {
     lastConnection?: string
     lastConnectionAt?: string
     lastDisconnectReason?: string
+    lastDisconnectCode?: number
     lastError?: string
     lastQrAt?: string
+    pairingNumberConfigured?: boolean
+    pairingRequested?: boolean
+    lastPairingAttemptAt?: string
+    lastPairingCodeAt?: string
+    authStateSummary?: {
+      registered: boolean
+      meId?: string
+      accountSyncCounter?: number
+      deviceId?: string
+    }
   }[]
 }

@@ -29,8 +29,19 @@ export type GatewayAccountStatus = {
   lastConnection?: string
   lastConnectionAt?: string
   lastDisconnectReason?: string
+  lastDisconnectCode?: number
   lastError?: string
   lastQrAt?: string
+  pairingNumberConfigured?: boolean
+  pairingRequested?: boolean
+  lastPairingAttemptAt?: string
+  lastPairingCodeAt?: string
+  authStateSummary?: {
+    registered: boolean
+    meId?: string
+    accountSyncCounter?: number
+    deviceId?: string
+  }
 }
 
 type ManagedSock = ReturnType<typeof makeWASocket>
@@ -172,6 +183,17 @@ export class GatewayManager {
 
       let pairingRequested = false
 
+      this.updateStatus(accountId, {
+        pairingNumberConfigured: Boolean(pairingNumber),
+        pairingRequested: false,
+        authStateSummary: {
+          registered: !!state.creds.registered,
+          meId: state.creds.me?.id ?? undefined,
+          accountSyncCounter: state.creds.accountSyncCounter,
+          deviceId: state.creds.me?.lid ?? undefined,
+        },
+      })
+
       sock.ev.on('connection.update', (update: Partial<ConnectionState>) => {
         const { connection, lastDisconnect, qr } = update
 
@@ -240,14 +262,30 @@ export class GatewayManager {
             registered: !!sock.authState.creds.registered,
             phoneNumber: sock.authState.creds.me?.id ?? undefined,
             platform: sock.authState.creds.platform,
+            authStateSummary: {
+              registered: !!sock.authState.creds.registered,
+              meId: sock.authState.creds.me?.id ?? undefined,
+              accountSyncCounter: sock.authState.creds.accountSyncCounter,
+              deviceId: sock.authState.creds.me?.lid ?? undefined,
+            },
           })
 
           if (!sock.authState.creds.registered && pairingNumber && !pairingRequested) {
             pairingRequested = true
+            const pairingAttemptAt = new Date().toISOString()
+            console.log(`[${accountId}] 🔐 Requesting pairing code for ${pairingNumber}`)
+            this.updateStatus(accountId, {
+              pairingRequested: true,
+              lastPairingAttemptAt: pairingAttemptAt,
+            })
             void sock.requestPairingCode(pairingNumber)
               .then((code) => {
                 console.log(`[${accountId}] 🔐 Pairing code: ${code}`)
                 console.log(`[${accountId}] Use WhatsApp > Linked devices > Link with phone number`)
+                this.updateStatus(accountId, {
+                  pairingRequested: false,
+                  lastPairingCodeAt: new Date().toISOString(),
+                })
               })
               .catch((error: unknown) => {
                 pairingRequested = false
@@ -255,6 +293,7 @@ export class GatewayManager {
                 console.error(`[${accountId}] pairing code error`, error)
                 this.updateStatus(accountId, {
                   lastError: message,
+                  pairingRequested: false,
                 })
                 this.emitError(accountId, 'pairing_code_failed', message, {
                   stage: 'pairing',
@@ -281,8 +320,16 @@ export class GatewayManager {
             phoneNumber: sock.authState.creds.me?.id ?? undefined,
             platform: sock.authState.creds.platform,
             lastDisconnectReason: disconnectReason,
+            lastDisconnectCode: disconnectError?.output?.statusCode,
             lastError: String(lastDisconnect?.error ?? ''),
             lastConnectionAt: new Date().toISOString(),
+            pairingRequested: false,
+            authStateSummary: {
+              registered: !!sock.authState.creds.registered,
+              meId: sock.authState.creds.me?.id ?? undefined,
+              accountSyncCounter: sock.authState.creds.accountSyncCounter,
+              deviceId: sock.authState.creds.me?.lid ?? undefined,
+            },
           })
 
           this.registry.upsert(accountId, { state: shouldReconnect ? 'reconnecting' : 'stopped' })
@@ -309,6 +356,12 @@ export class GatewayManager {
           registered: !!sock.authState.creds.registered,
           phoneNumber: sock.authState.creds.me?.id ?? undefined,
           platform: sock.authState.creds.platform,
+          authStateSummary: {
+            registered: !!sock.authState.creds.registered,
+            meId: sock.authState.creds.me?.id ?? undefined,
+            accountSyncCounter: sock.authState.creds.accountSyncCounter,
+            deviceId: sock.authState.creds.me?.lid ?? undefined,
+          },
         })
 
         this.emit({
@@ -474,6 +527,12 @@ export class GatewayManager {
       platform: undefined,
       lastConnection: 'reset',
       lastQrAt: undefined,
+      pairingRequested: false,
+      lastPairingAttemptAt: undefined,
+      lastPairingCodeAt: undefined,
+      authStateSummary: {
+        registered: false,
+      },
     })
 
     return {

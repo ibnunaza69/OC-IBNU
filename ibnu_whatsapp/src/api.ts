@@ -73,6 +73,7 @@ export function createApi(manager: GatewayManager) {
         webhookPath: APP_CONFIG.webhookPath,
         webhookTargetConfigured: Boolean(APP_CONFIG.webhookUrl),
         apiKeyEnabled: APP_CONFIG.apiKeys.length > 0,
+        preferIpv4: APP_CONFIG.preferIpv4,
       },
       summary: {
         accountCount: accounts.length,

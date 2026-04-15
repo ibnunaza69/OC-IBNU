@@ -39,6 +39,7 @@ Variabel penting:
 - `WA_PAIRING_NUMBER`
 - `WEBHOOK_PATH`
 - `API_KEYS` (opsional; kalau kosong, middleware API key dimatikan)
+- `PREFER_IPV4` (default `true`; berguna di VPS yang IPv6-nya tidak benar-benar usable)
 
 ## Endpoint utama
 
@@ -50,6 +51,7 @@ Variabel penting:
   - sekarang juga expose metadata registry account
 - `GET /diagnostics`
   - ringkasan service/runtime + registry + account error state untuk troubleshooting
+  - sekarang juga expose jejak pairing/runtime seperti `pairingRequested`, `lastPairingAttemptAt`, `lastPairingCodeAt`, `lastDisconnectCode`, dan `authStateSummary`
 
 ### Account control
 - `POST /accounts`
@@ -148,3 +150,4 @@ curl -X POST http://localhost:8080/send \
 2. audit race condition reconnect vs manual lifecycle action di runtime nyata
 3. admin dashboard frontend terpisah
 4. pembuktian pairing dari environment lain
+5. lanjutkan isolasi environment VPS bila pairing tetap gagal sebelum code/QR muncul

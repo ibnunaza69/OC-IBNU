@@ -1,11 +1,16 @@
 import * as fs from 'fs'
 import http from 'http'
+import dns from 'node:dns'
 import { createApi } from './api.js'
 import { APP_CONFIG } from './config.js'
 import { GatewayManager } from './gateway-manager.js'
 import { WebhookDispatcher } from './webhook-dispatcher.js'
 
 async function main() {
+  if (APP_CONFIG.preferIpv4) {
+    dns.setDefaultResultOrder('ipv4first')
+  }
+
   console.log('🚀 ibnu_whatsapp starting...')
   console.log(`   Port: ${APP_CONFIG.port}`)
   console.log(`   Session dir: ${APP_CONFIG.sessionDir}`)
@@ -13,6 +18,7 @@ async function main() {
   console.log(`   Pairing number: ${APP_CONFIG.pairingNumber ? 'set' : 'not set'}`)
   console.log(`   Default account: ${APP_CONFIG.defaultAccountId}`)
   console.log(`   Webhook target: ${APP_CONFIG.webhookUrl || 'not set'}`)
+  console.log(`   DNS preference: ${APP_CONFIG.preferIpv4 ? 'ipv4first' : 'system default'}`)
 
   if (!fs.existsSync(APP_CONFIG.sessionDir)) {
     fs.mkdirSync(APP_CONFIG.sessionDir, { recursive: true })

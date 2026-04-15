@@ -14,4 +14,5 @@ export const APP_CONFIG = {
     .map((key) => key.trim())
     .filter(Boolean),
   accountRegistryPath: path.resolve('./data/accounts.sqlite'),
+  preferIpv4: (process.env.PREFER_IPV4 ?? 'true').toLowerCase() !== 'false',
 } as const
