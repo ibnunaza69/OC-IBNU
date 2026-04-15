@@ -45,6 +45,35 @@ Repro ini hanya fokus pada:
 - disconnect code/message/detail
 - auth creds summary
 
+## Baileys repro v2 (variasi fingerprint/options)
+
+Versi v2 dipakai untuk A/B test beberapa fingerprint/profile koneksi tanpa menyentuh layer gateway utama.
+
+Contoh:
+
+```bash
+BAILEYS_REPRO_PAIRING_NUMBER=6281222627969 BAILEYS_REPRO_PROFILE=mac-desktop npm run repro:v2
+```
+
+Profile yang tersedia:
+- `mac-desktop`
+- `mac-safari`
+- `ubuntu-desktop`
+- `ubuntu-chrome`
+- `windows-desktop`
+- `windows-chrome`
+
+Env penting:
+- `BAILEYS_REPRO_PROFILE`
+- `BAILEYS_REPRO_PAIRING_NUMBER`
+- `BAILEYS_REPRO_SESSION_DIR`
+- `BAILEYS_REPRO_QR_PATH`
+- `PREFER_IPV4`
+
+Default path v2 dipisah per profile agar sesi tiap eksperimen tidak saling menimpa:
+- session: `./sessions/repro-v2/<profile>`
+- QR: `./sessions/repro-v2/<profile>/qr.png`
+
 Default API server:
 - `http://localhost:8080`
 
