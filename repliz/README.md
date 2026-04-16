@@ -4,7 +4,7 @@ Aturan slot default:
 - 7 slot per hari
 - mulai jam 05:00
 - jeda 3 jam
-- timezone kerja: UTC+8
+- timezone kerja: WIB / Asia/Jakarta (UTC+7)
 - slot harian: 05:00, 08:00, 11:00, 14:00, 17:00, 20:00, 23:00
 - jika slot sudah terisi, update baru otomatis pindah ke slot kosong berikutnya
 - teks akan disanitise agar tidak mengandung karakter China
