@@ -58,6 +58,13 @@ node scripts/repliz-slot-scheduler.mjs schedule-daily-nested --slug jahe-pagi
 node scripts/repliz-slot-scheduler.mjs topics
 ```
 
+## Isi slot kosong sampai horizon tertentu
+
+```bash
+node scripts/repliz-slot-scheduler.mjs ensure-horizon --days 30 --dry-run
+node scripts/repliz-slot-scheduler.mjs ensure-horizon --days 30
+```
+
 ## Kalau account lebih dari satu
 
 ```bash

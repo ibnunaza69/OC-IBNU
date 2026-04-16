@@ -114,6 +114,15 @@ async function main() {
     return;
   }
 
+  if (command === 'ensure-horizon') {
+    const accountId = getOption('--account-id');
+    const dryRun = hasFlag('--dry-run');
+    const days = Number(getOption('--days') ?? '30');
+    const result = await ensureHorizon({ accountId, days, dryRun });
+    console.log(JSON.stringify(result, null, 2));
+    return;
+  }
+
   if (command === 'slots') {
     const accountId = getOption('--account-id');
     const result = await inspectSlots({ accountId, days: Number(getOption('--days') ?? '3') });
@@ -126,6 +135,7 @@ async function main() {
   console.error('  node scripts/repliz-slot-scheduler.mjs next [--account-id ID]');
   console.error('  node scripts/repliz-slot-scheduler.mjs slots [--account-id ID] [--days 3]');
   console.error('  node scripts/repliz-slot-scheduler.mjs topics');
+  console.error('  node scripts/repliz-slot-scheduler.mjs ensure-horizon [--account-id ID] [--days 30] [--dry-run]');
   console.error('  node scripts/repliz-slot-scheduler.mjs schedule --text "..." [--account-id ID] [--title "..."] [--type text] [--dry-run]');
   console.error('  node scripts/repliz-slot-scheduler.mjs preview-daily-nested [--account-id ID] [--slug TOPIC_SLUG]');
   console.error('  node scripts/repliz-slot-scheduler.mjs schedule-daily-nested [--account-id ID] [--slug TOPIC_SLUG] [--dry-run]');
@@ -178,6 +188,43 @@ async function inspectSlots({ accountId, days }) {
     slotRules: config,
     checkedScheduleCount: schedules.docs?.length ?? 0,
     slots: output
+  };
+}
+
+async function ensureHorizon({ accountId, days, dryRun }) {
+  const account = await resolveAccount(accountId);
+  const schedules = await fetchSchedules(account._id, 500);
+  const occupied = buildOccupiedSlotKeySet(schedules.docs ?? []);
+  const scheduledLocalDates = buildScheduledLocalDateSet(schedules.docs ?? []);
+  const targetDailySlots = listTargetDailySlots(occupied, scheduledLocalDates, days);
+  const created = [];
+
+  for (let index = 0; index < targetDailySlots.length; index += 1) {
+    const slot = targetDailySlots[index];
+    const topic = pickTopicForDate(new Date(slot.scheduleAtUtc));
+    const payload = buildNestedPayload(topic, { account, slot });
+
+    if (dryRun) {
+      created.push({ slot, topic, payload });
+      continue;
+    }
+
+    const result = await api('/public/schedule', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+
+    created.push({ slot, topic, created: result });
+    occupied.add(slot.slotKey);
+    scheduledLocalDates.add(slot.localDate);
+  }
+
+  return {
+    account,
+    requestedDays: days,
+    dryRun,
+    createdCount: created.length,
+    items: created
   };
 }
 
@@ -262,6 +309,38 @@ function buildNestedPayload(topic, next) {
       medias: []
     }))
   };
+}
+
+function listTargetDailySlots(occupied, scheduledLocalDates, days) {
+  const today = new Date();
+  const output = [];
+
+  for (let dayOffset = 0; dayOffset < days; dayOffset += 1) {
+    const daySlots = buildDaySlots(today, dayOffset);
+    const localDate = daySlots[0]?.localDate;
+    if (!localDate) continue;
+    if (scheduledLocalDates.has(localDate)) continue;
+
+    const nextEmptySlot = daySlots.find((slot) => slot.utcMs > Date.now() && !occupied.has(slot.slotKey));
+    if (nextEmptySlot) {
+      output.push(nextEmptySlot);
+      occupied.add(nextEmptySlot.slotKey);
+      scheduledLocalDates.add(localDate);
+    }
+  }
+
+  return output;
+}
+
+function buildScheduledLocalDateSet(schedules) {
+  const set = new Set();
+  for (const item of schedules) {
+    const when = item.scheduleAt ?? item.createdAt;
+    if (!when) continue;
+    const parts = toOffsetDateParts(new Date(when), config.timezoneOffsetMinutes);
+    set.add(`${parts.year}-${pad(parts.month)}-${pad(parts.day)}`);
+  }
+  return set;
 }
 
 function buildOccupiedSlotKeySet(schedules) {
