@@ -1,0 +1,9 @@
+{
+  "timezoneOffsetMinutes": 480,
+  "slotCount": 7,
+  "startHour": 5,
+  "intervalHours": 3,
+  "defaultType": "text",
+  "defaultTitle": "",
+  "sanitizeChineseCharacters": true
+}
