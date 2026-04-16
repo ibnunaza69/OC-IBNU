@@ -9,6 +9,7 @@ const configPath = path.join(workspaceRoot, 'repliz/slot-config.json');
 loadSimpleEnv(globalEnvPath);
 
 const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+const topicsCatalog = loadTopicsCatalog(config.dailyTopicFile);
 const args = process.argv.slice(2);
 const command = args[0] ?? 'next';
 
@@ -76,6 +77,43 @@ async function main() {
     return;
   }
 
+  if (command === 'schedule-daily-nested') {
+    const accountId = getOption('--account-id');
+    const dryRun = hasFlag('--dry-run');
+    const forceSlug = getOption('--slug');
+    const next = await getNextAvailableSlot({ accountId });
+    const topic = pickTopicForDate(new Date(next.slot.scheduleAtUtc), forceSlug);
+    const payload = buildNestedPayload(topic, next);
+
+    if (dryRun) {
+      console.log(JSON.stringify({ dryRun: true, selectedSlot: next.slot, topic, payload }, null, 2));
+      return;
+    }
+
+    const created = await api('/public/schedule', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+
+    console.log(JSON.stringify({ dryRun: false, selectedSlot: next.slot, topic, payload, created }, null, 2));
+    return;
+  }
+
+  if (command === 'preview-daily-nested') {
+    const accountId = getOption('--account-id');
+    const forceSlug = getOption('--slug');
+    const next = await getNextAvailableSlot({ accountId });
+    const topic = pickTopicForDate(new Date(next.slot.scheduleAtUtc), forceSlug);
+    const payload = buildNestedPayload(topic, next);
+    console.log(JSON.stringify({ selectedSlot: next.slot, topic, payload }, null, 2));
+    return;
+  }
+
+  if (command === 'topics') {
+    console.log(JSON.stringify(topicsCatalog, null, 2));
+    return;
+  }
+
   if (command === 'slots') {
     const accountId = getOption('--account-id');
     const result = await inspectSlots({ accountId, days: Number(getOption('--days') ?? '3') });
@@ -87,7 +125,10 @@ async function main() {
   console.error('Usage:');
   console.error('  node scripts/repliz-slot-scheduler.mjs next [--account-id ID]');
   console.error('  node scripts/repliz-slot-scheduler.mjs slots [--account-id ID] [--days 3]');
+  console.error('  node scripts/repliz-slot-scheduler.mjs topics');
   console.error('  node scripts/repliz-slot-scheduler.mjs schedule --text "..." [--account-id ID] [--title "..."] [--type text] [--dry-run]');
+  console.error('  node scripts/repliz-slot-scheduler.mjs preview-daily-nested [--account-id ID] [--slug TOPIC_SLUG]');
+  console.error('  node scripts/repliz-slot-scheduler.mjs schedule-daily-nested [--account-id ID] [--slug TOPIC_SLUG] [--dry-run]');
   process.exit(1);
 }
 
@@ -165,6 +206,62 @@ async function fetchSchedules(accountId, limit) {
   params.set('page', '1');
   params.append('accountIds[]', accountId);
   return api(`/public/schedule?${params.toString()}`);
+}
+
+function loadTopicsCatalog(filePath) {
+  if (!filePath || !fs.existsSync(filePath)) {
+    return { niche: [], threadLength: config.nestedThreadLength ?? 4, topics: [] };
+  }
+
+  const parsed = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  return {
+    niche: parsed.niche ?? [],
+    threadLength: parsed.threadLength ?? config.nestedThreadLength ?? 4,
+    topics: Array.isArray(parsed.topics) ? parsed.topics : []
+  };
+}
+
+function pickTopicForDate(date, forceSlug) {
+  if (!topicsCatalog.topics.length) {
+    throw new Error('No daily topics configured');
+  }
+
+  if (forceSlug) {
+    const found = topicsCatalog.topics.find((item) => item.slug === forceSlug);
+    if (!found) {
+      throw new Error(`Topic slug not found: ${forceSlug}`);
+    }
+    return found;
+  }
+
+  const parts = toOffsetDateParts(date, config.timezoneOffsetMinutes);
+  const daySeed = Date.UTC(parts.year, parts.month - 1, parts.day, 0, 0, 0, 0) / 86400000;
+  const index = Math.abs(daySeed) % topicsCatalog.topics.length;
+  return topicsCatalog.topics[index];
+}
+
+function buildNestedPayload(topic, next) {
+  const threadLength = config.nestedThreadLength ?? topicsCatalog.threadLength ?? 4;
+  const posts = (topic.posts ?? []).slice(0, threadLength).map((text) => sanitizeText(text));
+
+  if (!posts.length) {
+    throw new Error(`Topic has no posts: ${topic.slug}`);
+  }
+
+  return {
+    title: sanitizeText(topic.title ?? ''),
+    description: posts[0],
+    type: config.defaultType ?? 'text',
+    medias: [],
+    scheduleAt: next.slot.scheduleAtUtc,
+    accountId: next.account._id,
+    replies: posts.slice(1).map((text) => ({
+      title: '',
+      description: text,
+      type: 'text',
+      medias: []
+    }))
+  };
 }
 
 function buildOccupiedSlotKeySet(schedules) {

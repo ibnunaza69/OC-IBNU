@@ -5,5 +5,8 @@
   "intervalHours": 3,
   "defaultType": "text",
   "defaultTitle": "",
-  "sanitizeChineseCharacters": true
+  "sanitizeChineseCharacters": true,
+  "nestedThreadLength": 4,
+  "dailyNestedEnabled": true,
+  "dailyTopicFile": "/root/.openclaw/workspace/repliz/daily-topics.json"
 }

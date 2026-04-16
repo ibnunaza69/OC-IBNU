@@ -33,9 +33,35 @@ node scripts/repliz-slot-scheduler.mjs schedule --text "Update baru" --dry-run
 node scripts/repliz-slot-scheduler.mjs schedule --text "Update baru"
 ```
 
+## Preview nested thread harian
+
+```bash
+node scripts/repliz-slot-scheduler.mjs preview-daily-nested
+```
+
+## Schedule nested thread harian
+
+```bash
+node scripts/repliz-slot-scheduler.mjs schedule-daily-nested
+```
+
+## Pakai topik tertentu
+
+```bash
+node scripts/repliz-slot-scheduler.mjs preview-daily-nested --slug jahe-pagi
+node scripts/repliz-slot-scheduler.mjs schedule-daily-nested --slug jahe-pagi
+```
+
+## Lihat katalog topik niche
+
+```bash
+node scripts/repliz-slot-scheduler.mjs topics
+```
+
 ## Kalau account lebih dari satu
 
 ```bash
 node scripts/repliz-slot-scheduler.mjs next --account-id YOUR_ACCOUNT_ID
 node scripts/repliz-slot-scheduler.mjs schedule --account-id YOUR_ACCOUNT_ID --text "Update baru"
+node scripts/repliz-slot-scheduler.mjs schedule-daily-nested --account-id YOUR_ACCOUNT_ID
 ```
