@@ -1,0 +1,12 @@
+{
+  "timezoneOffsetMinutes": 420,
+  "slotCount": 7,
+  "startHour": 5,
+  "intervalHours": 3,
+  "defaultType": "text",
+  "defaultTitle": "",
+  "sanitizeChineseCharacters": true,
+  "nestedThreadLength": 4,
+  "dailyNestedEnabled": true,
+  "dailyTopicFile": "/root/.openclaw/workspace/repliz_ibnu/daily-topics.json"
+}
