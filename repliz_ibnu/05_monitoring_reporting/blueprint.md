@@ -17,12 +17,15 @@ Monitoring queue, audit status publish, dan format laporan yang berguna buat Abi
 
 ## Reporting style
 - Jawaban harus langsung dan ringkas
-- Checklist jam boleh dipakai kalau sedang audit hari tertentu
+- Checklist jam harus dipakai untuk laporan otomatis setelah posting publish
 - Untuk status hari ini, tampilkan isi konten + status jam yang sudah terbit
+- Gunakan tanda centang untuk slot yang sudah ter-post
 - Hindari wording berisik; fokus ke apa yang sudah publish, apa yang pending, dan apakah ada error
 
 ## Suggested recurring report blocks
 - Hari ini
+- Checklist 7 slot harian
+- Isi materi yang baru ter-post
 - Besok
 - 7 hari ke depan
 - Rekap total queue
@@ -31,4 +34,5 @@ Monitoring queue, audit status publish, dan format laporan yang berguna buat Abi
 ## Analysis
 - Abi ternyata suka format monitoring yang konkret, bukan sekadar bilang 'aman'.
 - Menampilkan isi konten + checklist jam membantu membedakan antara slot config teoritis dan slot yang benar-benar dipakai queue.
-- Blueprint area ini penting karena operasi Repliz ke depan kemungkinan lebih sering audit/monitor daripada coding besar.
+- Abi sekarang juga minta laporan otomatis ke Telegram setiap selesai posting.
+- Blueprint area ini penting karena operasi Repliz ke depan kemungkinan lebih sering audit/monitor dan comment handling daripada coding besar.

@@ -83,7 +83,7 @@ async function main() {
     const dryRun = hasFlag('--dry-run');
     const forceSlug = getOption('--slug');
     const next = await getNextAvailableSlot({ accountId });
-    const topic = pickTopicForDate(new Date(next.slot.scheduleAtUtc), forceSlug);
+    const topic = pickTopicForSlot(next.slot, { forceSlug });
     const payload = buildNestedPayload(topic, next);
 
     if (dryRun) {
@@ -104,7 +104,7 @@ async function main() {
     const accountId = getOption('--account-id');
     const forceSlug = getOption('--slug');
     const next = await getNextAvailableSlot({ accountId });
-    const topic = pickTopicForDate(new Date(next.slot.scheduleAtUtc), forceSlug);
+    const topic = pickTopicForSlot(next.slot, { forceSlug });
     const payload = buildNestedPayload(topic, next);
     console.log(JSON.stringify({ selectedSlot: next.slot, topic, payload }, null, 2));
     return;
@@ -131,6 +131,31 @@ async function main() {
     return;
   }
 
+  if (command === 'report-day') {
+    const accountId = getOption('--account-id');
+    const date = getOption('--date');
+    const result = await reportDay({ accountId, date });
+    console.log(JSON.stringify(result, null, 2));
+    return;
+  }
+
+  if (command === 'report-day-text') {
+    const accountId = getOption('--account-id');
+    const date = getOption('--date');
+    const result = await reportDay({ accountId, date });
+    console.log(result.text);
+    return;
+  }
+
+  if (command === 'process-comments') {
+    const accountId = getOption('--account-id');
+    const dryRun = hasFlag('--dry-run');
+    const limit = Number(getOption('--limit') ?? '20');
+    const result = await processComments({ accountId, dryRun, limit });
+    console.log(JSON.stringify(result, null, 2));
+    return;
+  }
+
   console.error(`Unknown command: ${command}`);
   console.error('Usage:');
   console.error('  node repliz_ibnu/scripts/repliz-slot-scheduler.mjs next [--account-id ID]');
@@ -140,12 +165,15 @@ async function main() {
   console.error('  node repliz_ibnu/scripts/repliz-slot-scheduler.mjs schedule --text "..." [--account-id ID] [--title "..."] [--type text] [--dry-run]');
   console.error('  node repliz_ibnu/scripts/repliz-slot-scheduler.mjs preview-daily-nested [--account-id ID] [--slug TOPIC_SLUG]');
   console.error('  node repliz_ibnu/scripts/repliz-slot-scheduler.mjs schedule-daily-nested [--account-id ID] [--slug TOPIC_SLUG] [--dry-run]');
+  console.error('  node repliz_ibnu/scripts/repliz-slot-scheduler.mjs report-day [--account-id ID] [--date YYYY-MM-DD]');
+  console.error('  node repliz_ibnu/scripts/repliz-slot-scheduler.mjs report-day-text [--account-id ID] [--date YYYY-MM-DD]');
+  console.error('  node repliz_ibnu/scripts/repliz-slot-scheduler.mjs process-comments [--account-id ID] [--limit 20] [--dry-run]');
   process.exit(1);
 }
 
 async function getNextAvailableSlot({ accountId }) {
   const account = await resolveAccount(accountId);
-  const schedules = await fetchSchedules(account._id, 200);
+  const schedules = await fetchSchedules(account._id, 500);
   const occupied = buildOccupiedSlotKeySet(schedules.docs ?? []);
 
   const now = new Date();
@@ -170,7 +198,7 @@ async function getNextAvailableSlot({ accountId }) {
 
 async function inspectSlots({ accountId, days }) {
   const account = await resolveAccount(accountId);
-  const schedules = await fetchSchedules(account._id, 200);
+  const schedules = await fetchSchedules(account._id, 500);
   const occupied = buildOccupiedSlotKeySet(schedules.docs ?? []);
   const today = new Date();
   const output = [];
@@ -196,28 +224,29 @@ async function ensureHorizon({ accountId, days, dryRun }) {
   const account = await resolveAccount(accountId);
   const schedules = await fetchSchedules(account._id, 500);
   const occupied = buildOccupiedSlotKeySet(schedules.docs ?? []);
-  const scheduledLocalDates = buildScheduledLocalDateSet(schedules.docs ?? []);
-  const targetDailySlots = listTargetDailySlots(occupied, scheduledLocalDates, days);
+  const targetSlots = listTargetSlots(occupied, days);
   const created = [];
+  const dayUsedSlugs = buildDayUsedSlugsMap(schedules.docs ?? []);
 
-  for (let index = 0; index < targetDailySlots.length; index += 1) {
-    const slot = targetDailySlots[index];
-    const topic = pickTopicForDate(new Date(slot.scheduleAtUtc));
+  for (let index = 0; index < targetSlots.length; index += 1) {
+    const slot = targetSlots[index];
+    const usedSlugs = dayUsedSlugs.get(slot.localDate) ?? new Set();
+    const topic = pickTopicForSlot(slot, { usedSlugsToday: usedSlugs });
     const payload = buildNestedPayload(topic, { account, slot });
 
     if (dryRun) {
       created.push({ slot, topic, payload });
-      continue;
+    } else {
+      const result = await api('/public/schedule', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+      created.push({ slot, topic, created: result });
     }
 
-    const result = await api('/public/schedule', {
-      method: 'POST',
-      body: JSON.stringify(payload)
-    });
-
-    created.push({ slot, topic, created: result });
     occupied.add(slot.slotKey);
-    scheduledLocalDates.add(slot.localDate);
+    usedSlugs.add(topic.slug);
+    dayUsedSlugs.set(slot.localDate, usedSlugs);
   }
 
   return {
@@ -226,6 +255,90 @@ async function ensureHorizon({ accountId, days, dryRun }) {
     dryRun,
     createdCount: created.length,
     items: created
+  };
+}
+
+async function reportDay({ accountId, date }) {
+  const account = await resolveAccount(accountId);
+  const schedules = await fetchSchedules(account._id, 500);
+  const targetDate = date ?? currentLocalDateString(new Date());
+  const daySlots = buildDaySlots(fromLocalDateString(targetDate), 0);
+  const dayItems = (schedules.docs ?? [])
+    .filter((item) => mapItemToDay(item)?.localDate === targetDate)
+    .sort((a, b) => new Date(a.scheduleAt ?? a.createdAt).getTime() - new Date(b.scheduleAt ?? b.createdAt).getTime());
+
+  const slotRows = daySlots.map((slot) => {
+    const match = dayItems.find((item) => mapItemToSlotKey(item) === slot.slotKey);
+    return {
+      slotKey: slot.slotKey,
+      localTime: slot.localTime,
+      checked: Boolean(match && match.status === 'success'),
+      occupied: Boolean(match),
+      status: match?.status ?? 'empty',
+      title: match?.title ?? '',
+      description: match?.description ?? '',
+      replies: Array.isArray(match?.replies) ? match.replies.map((reply) => reply.description ?? '').filter(Boolean) : [],
+      id: match?._id ?? null
+    };
+  });
+
+  const extraItems = dayItems
+    .filter((item) => !slotRows.some((row) => row.id === item._id))
+    .map((item) => ({
+      id: item._id,
+      status: item.status ?? 'unknown',
+      title: item.title ?? '',
+      description: item.description ?? '',
+      localTime: mapItemToLocalTime(item) ?? 'unknown'
+    }));
+
+  return {
+    account,
+    localDate: targetDate,
+    slots: slotRows,
+    extraItems,
+    text: renderDayReportText({ account, localDate: targetDate, slots: slotRows, extraItems })
+  };
+}
+
+async function processComments({ accountId, dryRun, limit }) {
+  const account = await resolveAccount(accountId);
+  const queue = await fetchQueue(account._id, limit);
+  const pending = (queue.docs ?? []).filter((item) => item.status === 'pending' || !item.status);
+  const processed = [];
+
+  for (const item of pending) {
+    if (isOwnerComment(item, account)) {
+      processed.push({ id: item._id, action: 'skip-owner', preview: extractCommentText(item) });
+      continue;
+    }
+
+    const replyText = buildCommentReply(item);
+    if (!replyText) {
+      processed.push({ id: item._id, action: 'skip-no-reply', preview: extractCommentText(item) });
+      continue;
+    }
+
+    if (dryRun) {
+      processed.push({ id: item._id, action: 'would-reply', replyText, preview: extractCommentText(item) });
+      continue;
+    }
+
+    const result = await api(`/public/queue/${item._id}`, {
+      method: 'POST',
+      body: JSON.stringify({ text: replyText })
+    });
+
+    processed.push({ id: item._id, action: 'replied', replyText, result, preview: extractCommentText(item) });
+  }
+
+  return {
+    account,
+    dryRun,
+    checkedCount: queue.docs?.length ?? 0,
+    processedCount: processed.length,
+    items: processed,
+    note: 'Auto-like/love is not executed here because no supported Repliz API endpoint for reactions has been confirmed yet.'
   };
 }
 
@@ -256,6 +369,15 @@ async function fetchSchedules(accountId, limit) {
   return api(`/public/schedule?${params.toString()}`);
 }
 
+async function fetchQueue(accountId, limit) {
+  const params = new URLSearchParams();
+  params.set('limit', String(limit));
+  params.set('page', '1');
+  params.append('accountIds[]', accountId);
+  params.set('status', 'pending');
+  return api(`/public/queue?${params.toString()}`);
+}
+
 function loadTopicsCatalog(filePath) {
   if (!filePath || !fs.existsSync(filePath)) {
     return { niche: [], threadLength: config.nestedThreadLength ?? 4, topics: [] };
@@ -269,7 +391,7 @@ function loadTopicsCatalog(filePath) {
   };
 }
 
-function pickTopicForDate(date, forceSlug) {
+function pickTopicForSlot(slot, { forceSlug, usedSlugsToday = new Set() } = {}) {
   if (!topicsCatalog.topics.length) {
     throw new Error('No daily topics configured');
   }
@@ -282,10 +404,11 @@ function pickTopicForDate(date, forceSlug) {
     return found;
   }
 
-  const parts = toOffsetDateParts(date, config.timezoneOffsetMinutes);
-  const daySeed = Date.UTC(parts.year, parts.month - 1, parts.day, 0, 0, 0, 0) / 86400000;
-  const index = Math.abs(daySeed) % topicsCatalog.topics.length;
-  return topicsCatalog.topics[index];
+  const available = topicsCatalog.topics.filter((item) => !usedSlugsToday.has(item.slug));
+  const pool = available.length ? available : topicsCatalog.topics;
+  const seed = buildSlotSeed(slot);
+  const index = Math.abs(seed) % pool.length;
+  return pool[index];
 }
 
 function buildNestedPayload(topic, next) {
@@ -312,36 +435,66 @@ function buildNestedPayload(topic, next) {
   };
 }
 
-function listTargetDailySlots(occupied, scheduledLocalDates, days) {
+function listTargetSlots(occupied, days) {
   const today = new Date();
   const output = [];
 
   for (let dayOffset = 0; dayOffset < days; dayOffset += 1) {
     const daySlots = buildDaySlots(today, dayOffset);
-    const localDate = daySlots[0]?.localDate;
-    if (!localDate) continue;
-    if (scheduledLocalDates.has(localDate)) continue;
-
-    const nextEmptySlot = daySlots.find((slot) => slot.utcMs > Date.now() && !occupied.has(slot.slotKey));
-    if (nextEmptySlot) {
-      output.push(nextEmptySlot);
-      occupied.add(nextEmptySlot.slotKey);
-      scheduledLocalDates.add(localDate);
+    for (const slot of daySlots) {
+      if (slot.utcMs <= Date.now()) continue;
+      if (occupied.has(slot.slotKey)) continue;
+      output.push(slot);
+      occupied.add(slot.slotKey);
     }
   }
 
   return output;
 }
 
-function buildScheduledLocalDateSet(schedules) {
-  const set = new Set();
+function buildDayUsedSlugsMap(schedules) {
+  const output = new Map();
   for (const item of schedules) {
-    const when = item.scheduleAt ?? item.createdAt;
-    if (!when) continue;
-    const parts = toOffsetDateParts(new Date(when), config.timezoneOffsetMinutes);
-    set.add(`${parts.year}-${pad(parts.month)}-${pad(parts.day)}`);
+    const mapped = mapItemToDay(item);
+    if (!mapped?.localDate) continue;
+    const slug = inferTopicSlug(item);
+    if (!slug) continue;
+    const set = output.get(mapped.localDate) ?? new Set();
+    set.add(slug);
+    output.set(mapped.localDate, set);
   }
-  return set;
+  return output;
+}
+
+function inferTopicSlug(item) {
+  const title = sanitizeText(item?.title ?? '');
+  const description = sanitizeText(item?.description ?? '');
+  for (const topic of topicsCatalog.topics) {
+    if (sanitizeText(topic.title ?? '') === title) return topic.slug;
+    if ((topic.posts ?? []).some((post) => sanitizeText(post) === description)) return topic.slug;
+  }
+  return null;
+}
+
+function mapItemToDay(item) {
+  const when = item.scheduleAt ?? item.createdAt;
+  if (!when) return null;
+  const parts = toOffsetDateParts(new Date(when), config.timezoneOffsetMinutes);
+  return {
+    localDate: `${parts.year}-${pad(parts.month)}-${pad(parts.day)}`,
+    localTime: `${pad(parts.hour)}:${pad(parts.minute)}`
+  };
+}
+
+function mapItemToSlotKey(item) {
+  const when = item.scheduleAt ?? item.createdAt;
+  if (!when) return null;
+  const slot = mapDateToSlot(new Date(when));
+  return slot?.slotKey ?? null;
+}
+
+function mapItemToLocalTime(item) {
+  return mapItemToDay(item)?.localTime ?? null;
 }
 
 function buildOccupiedSlotKeySet(schedules) {
@@ -386,6 +539,12 @@ function buildDaySlots(referenceDate, dayOffset) {
   return slots;
 }
 
+function buildSlotSeed(slot) {
+  const [year, month, day] = slot.localDate.split('-').map(Number);
+  const hour = Number(slot.localTime.split(':')[0]);
+  return Date.UTC(year, month - 1, day, 0, 0, 0, 0) / 86400000 * 100 + hour;
+}
+
 function mapDateToSlot(date) {
   const parts = toOffsetDateParts(date, config.timezoneOffsetMinutes);
   if (parts.minute !== 0) return null;
@@ -401,8 +560,106 @@ function mapDateToSlot(date) {
   };
 }
 
+function renderDayReportText({ account, localDate, slots, extraItems }) {
+  const lines = [];
+  lines.push(`Laporan ${account.username} - ${localDate} WIB`);
+  lines.push('');
+
+  for (const row of slots) {
+    const mark = row.checked ? '✅' : row.occupied ? '🕒' : '⬜';
+    lines.push(`${mark} ${row.localTime} - ${row.status}`);
+    if (row.occupied) {
+      if (row.title) lines.push(`   Judul: ${sanitizeText(row.title)}`);
+      if (row.description) lines.push(`   Isi: ${sanitizeText(row.description)}`);
+      for (let index = 0; index < row.replies.length; index += 1) {
+        lines.push(`   Balasan ${index + 1}: ${sanitizeText(row.replies[index])}`);
+      }
+    }
+  }
+
+  if (extraItems.length) {
+    lines.push('');
+    lines.push('Item non-slot:');
+    for (const item of extraItems) {
+      lines.push(`- ${item.localTime} - ${item.status} - ${sanitizeText(item.title || item.description || '(tanpa isi)')}`);
+    }
+  }
+
+  return lines.join('\n');
+}
+
+function isOwnerComment(item, account) {
+  const candidates = [
+    item?.username,
+    item?.userName,
+    item?.authorUsername,
+    item?.author?.username,
+    item?.user?.username,
+    item?.from?.username,
+    item?.name,
+    item?.authorName,
+    item?.author?.name,
+    item?.user?.name
+  ].filter(Boolean).map((value) => String(value).toLowerCase());
+
+  const ownerNames = [account.username, account.name].filter(Boolean).map((value) => String(value).toLowerCase());
+  return candidates.some((value) => ownerNames.includes(value));
+}
+
+function extractCommentText(item) {
+  return sanitizeText(
+    item?.text ??
+    item?.comment ??
+    item?.message ??
+    item?.content ??
+    item?.body ??
+    item?.description ??
+    ''
+  );
+}
+
+function buildCommentReply(item) {
+  const text = extractCommentText(item).toLowerCase();
+  const author = sanitizeText(
+    item?.username ??
+    item?.userName ??
+    item?.authorUsername ??
+    item?.author?.username ??
+    item?.name ??
+    ''
+  );
+
+  const prefix = author ? `@${author} ` : '';
+
+  if (!text) {
+    return `${prefix}Makasih sudah mampir dan kasih respons 🙏😊`;
+  }
+
+  if (/[?？]/.test(text) || /(gimana|bagaimana|caranya|boleh|bisa|apakah|kapan|kenapa|why|how|what)/.test(text)) {
+    return `${prefix}Makasih sudah tanya 🙌 Nanti saya bantu jawab pelan-pelan ya. Semoga konteks di thread ini juga ikut membantu ✨`;
+  }
+
+  if (/(makasih|terima kasih|thanks|thank you|syukron)/.test(text)) {
+    return `${prefix}Sama-sama, senang kalau ini bermanfaat buat kamu 😊🌿`;
+  }
+
+  if (/(setuju|sepakat|relate|benar|bener|nice|mantap|bagus)/.test(text)) {
+    return `${prefix}Senang dengarnya 😄 Semoga isi thread ini benar-benar kepakai di keseharian ya ✨`;
+  }
+
+  if (/(tidur|insomnia|ngantuk|istirahat)/.test(text)) {
+    return `${prefix}Betul, ritme tidur memang sering jadi fondasi. Semoga pelan-pelan bisa lebih rapi dan badan terasa lebih enak 🙏😴`;
+  }
+
+  if (/(jahe|kunyit|temulawak|herbal|teh)/.test(text)) {
+    return `${prefix}Iya, herbal memang enak kalau dipakai sebagai pendamping rutinitas sehat, tetap lihat kecocokan tubuh masing-masing ya 🌿😊`;
+  }
+
+  return `${prefix}Makasih sudah ikut nimbrung 🙌 Semoga thread ini relevan dan ada bagian yang bisa dipakai di rutinitas harian kamu 😊`;
+}
+
 function sanitizeText(text) {
-  const trimmed = text.trim();
+  const trimmed = String(text ?? '').trim();
   if (!config.sanitizeChineseCharacters) return trimmed;
   return trimmed.replace(/[\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF]/g, '').replace(/\s{2,}/g, ' ').trim();
 }
@@ -483,6 +740,17 @@ function addLocalDays(parts, dayOffset) {
     month: shifted.getUTCMonth() + 1,
     day: shifted.getUTCDate()
   };
+}
+
+function currentLocalDateString(date) {
+  const parts = toOffsetDateParts(date, config.timezoneOffsetMinutes);
+  return `${parts.year}-${pad(parts.month)}-${pad(parts.day)}`;
+}
+
+function fromLocalDateString(value) {
+  const [year, month, day] = String(value).split('-').map(Number);
+  const utcMs = localPartsToUtcMs({ year, month, day, hour: 0, minute: 0, second: 0, ms: 0 }, config.timezoneOffsetMinutes);
+  return new Date(utcMs);
 }
 
 function pad(value) {

@@ -10,9 +10,11 @@ Menjadikan integrasi Repliz milik Abi sebagai workspace yang rapi, bisa diaudit,
 ## Current durable status
 - Integrasi Repliz sudah aktif dan kredensial disimpan di global env `~/.openclaw/.env`, bukan di repo.
 - Account Threads yang pernah terverifikasi aktif: `Agent022` / `azzamsalmamulia`.
+- Alias internal yang diminta Abi untuk account ini: `azzamsalmamulia_threads`.
 - Scheduler sekarang bekerja dengan timezone `WIB / Asia/Jakarta`.
 - Queue sudah pernah dinormalisasi agar pending item jatuh di `05:00 WIB`.
-- Pola aktif saat ini efektifnya `1 nested thread per hari` pada slot `05:00 WIB`.
+- Arah operasional baru dari Abi: anggap 7 slot harian sebagai slot aktif, dan materi per hari harus bervariasi.
+- Scope project harus siap berkembang ke platform lain seperti Instagram.
 
 ## Project principles
 - Rahasia tetap di luar git dan luar blueprint.
@@ -35,5 +37,7 @@ Menjadikan integrasi Repliz milik Abi sebagai workspace yang rapi, bisa diaudit,
 
 ## Notes for future work
 - Kalau nanti Abi mau multi-account Repliz, revisi area `01_accounts_access` dan `03_scheduler_ops` dulu.
-- Kalau nanti mau variasi jam selain `05:00 WIB`, cek apakah rule `1 post per day` tetap dipertahankan atau tidak.
+- Rule lama `1 post per day` sudah tidak lagi cocok dengan preferensi terbaru Abi; scheduler dan monitoring harus diarahkan ke 7 slot aktif per hari.
 - Untuk monitoring manual, folder ini harus jadi entry point utama, bukan lagi folder `repliz` lama.
+- Laporan otomatis ke Telegram setelah posting publish harus dianggap target inti, bukan bonus.
+- Auto-reply komentar non-owner harus diperlakukan sebagai kebutuhan operasional, sementara auto-like/love masih perlu pembuktian endpoint API.

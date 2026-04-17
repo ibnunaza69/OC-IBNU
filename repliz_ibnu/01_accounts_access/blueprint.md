@@ -14,7 +14,9 @@ Dokumentasi tentang account Repliz yang dipakai, cara aksesnya, dan batasan peny
 - Env yang dipakai: `REPLIZ_ACCESS_KEY`, `REPLIZ_SECRET_KEY`
 - Skill lokal tersedia di `/root/.openclaw/workspace/skills/repliz/`
 - Connected Threads account yang pernah diverifikasi: `Agent022` / `azzamsalmamulia`
+- Alias internal yang diminta Abi: `azzamsalmamulia_threads`
 - Scheduler dapat auto-resolve account jika hanya ada satu account connected
+- Scope project harus siap untuk platform lain seperti Instagram di masa lanjut
 
 ## Operational guidance
 - Jangan commit kredensial ke git.
@@ -23,5 +25,5 @@ Dokumentasi tentang account Repliz yang dipakai, cara aksesnya, dan batasan peny
 - `/public/account` adalah endpoint pertama untuk verifikasi akses hidup.
 
 ## Open questions
-- Belum ada alias internal resmi dari Abi untuk akun Threads ini selain nama account live dari Repliz.
-- Belum ada policy final apakah nanti akan ada account Threads kedua atau platform lain dalam folder yang sama.
+- Belum ada daftar alias resmi untuk calon account platform lain selain `azzamsalmamulia_threads`.
+- Masih perlu diputuskan mapping nama internal lintas platform, misalnya pola `username_platform` untuk semua account baru.

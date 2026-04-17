@@ -28,5 +28,7 @@ node repliz_ibnu/scripts/repliz-slot-scheduler.mjs ensure-horizon --days 30 --dr
 ## Catatan penting
 - Secrets tetap di `~/.openclaw/.env`
 - Timezone kerja aktif: `WIB / Asia/Jakarta`
-- Pola queue aktif saat ini: `1 nested thread per hari` di `05:00 WIB`
+- Alias internal account utama saat ini: `azzamsalmamulia_threads`
+- Scope project harus siap berkembang ke platform lain seperti Instagram
+- Preferensi operasional terbaru: 7 slot aktif per hari dengan materi yang berbeda-beda
 - Semua status/comment tetap harus bebas karakter China
