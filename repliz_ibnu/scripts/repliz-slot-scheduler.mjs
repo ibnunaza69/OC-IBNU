@@ -724,26 +724,35 @@ function renderDayReportText({ account, localDate, slots, extraItems }) {
 
 function renderTelegramSuccessText({ account, localDate, slots, extraItems, pendingDelivery }) {
   const lines = [];
-  lines.push(`Laporan publish ${account.username} - ${localDate} WIB`);
+  lines.push(`Report Threads ${account.username} - ${localDate} WIB`);
   lines.push('');
-  lines.push('Item baru sukses:');
+  lines.push('Baru sukses:');
   for (const item of pendingDelivery) {
-    lines.push(`- ${sanitizeText(item.label)}`);
+    lines.push(`✅ ${sanitizeText(item.label)}`);
   }
+
+  const successCount = slots.filter((row) => row.status === 'success').length;
+  const pendingCount = slots.filter((row) => row.status === 'pending').length;
+  const emptyCount = slots.filter((row) => !row.occupied).length;
   lines.push('');
-  lines.push('Ringkasan hari ini:');
-  for (const row of slots) {
-    const mark = row.status === 'success' ? '✅' : row.occupied ? '🕒' : '⬜';
-    lines.push(`${mark} ${row.localTime} - ${row.status}${row.title ? ` - ${sanitizeText(row.title)}` : ''}`);
+  lines.push(`Ringkas slot: success ${successCount} | pending ${pendingCount} | kosong ${emptyCount}`);
+
+  const compactRows = slots
+    .filter((row) => row.status === 'success' || row.status === 'pending')
+    .map((row) => `${row.status === 'success' ? '✅' : '🕒'} ${row.localTime}${row.title ? ` ${sanitizeText(row.title)}` : ''}`);
+  if (compactRows.length) {
+    lines.push('Aktif:');
+    for (const row of compactRows) lines.push(row);
   }
-  if (extraItems.length) {
-    lines.push('');
-    lines.push('Catch-up / non-slot:');
-    for (const item of extraItems) {
-      const mark = item.status === 'success' ? '✅' : item.status === 'pending' ? '🕒' : '•';
-      lines.push(`${mark} ${item.localTime} - ${item.status}${item.title ? ` - ${sanitizeText(item.title)}` : ''}`);
-    }
+
+  const extraActive = extraItems
+    .filter((item) => item.status === 'success' || item.status === 'pending')
+    .map((item) => `${item.status === 'success' ? '✅' : '🕒'} ${item.localTime}${item.title ? ` ${sanitizeText(item.title)}` : ''}`);
+  if (extraActive.length) {
+    lines.push('Catch-up:');
+    for (const row of extraActive) lines.push(row);
   }
+
   return lines.join('\n');
 }
 
@@ -824,8 +833,8 @@ function sanitizeText(text) {
 }
 
 function sendTelegramReport(text) {
-  const replyTo = process.env.REPLIZ_TELEGRAM_REPORT_TO ?? 'telegram:6186239554';
-  const commandArgs = ['agent', '--message', sanitizeText(text), '--deliver', '--reply-channel', 'telegram', '--reply-to', replyTo];
+  const replyTo = process.env.REPLIZ_TELEGRAM_REPORT_TO ?? '6186239554';
+  const commandArgs = ['agent', '--to', replyTo, '--message', sanitizeText(text), '--deliver', '--reply-channel', 'telegram', '--reply-to', replyTo];
   const result = spawnSync('openclaw', commandArgs, {
     cwd: workspaceRoot,
     env: process.env,
