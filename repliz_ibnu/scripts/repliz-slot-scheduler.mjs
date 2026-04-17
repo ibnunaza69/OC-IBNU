@@ -1,11 +1,19 @@
 #!/usr/bin/env node
 import fs from 'node:fs';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 
 const workspaceRoot = '/root/.openclaw/workspace';
 const projectRoot = path.join(workspaceRoot, 'repliz_ibnu');
 const globalEnvPath = '/root/.openclaw/.env';
 const configPath = path.join(projectRoot, 'slot-config.json');
+const runtimeRoot = path.join(projectRoot, 'runtime');
+const stateRoot = path.join(runtimeRoot, 'state');
+const reportStatePath = path.join(stateRoot, 'telegram-report-state.json');
+const commentStatePath = path.join(stateRoot, 'comment-worker-state.json');
+
+ensureDir(runtimeRoot);
+ensureDir(stateRoot);
 
 loadSimpleEnv(globalEnvPath);
 
@@ -156,6 +164,24 @@ async function main() {
     return;
   }
 
+  if (command === 'report-successes') {
+    const accountId = getOption('--account-id');
+    const date = getOption('--date');
+    const dryRun = hasFlag('--dry-run');
+    const result = await reportSuccesses({ accountId, date, dryRun });
+    console.log(JSON.stringify(result, null, 2));
+    return;
+  }
+
+  if (command === 'run-comment-worker-once') {
+    const accountId = getOption('--account-id');
+    const dryRun = hasFlag('--dry-run');
+    const limit = Number(getOption('--limit') ?? '20');
+    const result = await runCommentWorkerOnce({ accountId, dryRun, limit });
+    console.log(JSON.stringify(result, null, 2));
+    return;
+  }
+
   console.error(`Unknown command: ${command}`);
   console.error('Usage:');
   console.error('  node repliz_ibnu/scripts/repliz-slot-scheduler.mjs next [--account-id ID]');
@@ -168,6 +194,8 @@ async function main() {
   console.error('  node repliz_ibnu/scripts/repliz-slot-scheduler.mjs report-day [--account-id ID] [--date YYYY-MM-DD]');
   console.error('  node repliz_ibnu/scripts/repliz-slot-scheduler.mjs report-day-text [--account-id ID] [--date YYYY-MM-DD]');
   console.error('  node repliz_ibnu/scripts/repliz-slot-scheduler.mjs process-comments [--account-id ID] [--limit 20] [--dry-run]');
+  console.error('  node repliz_ibnu/scripts/repliz-slot-scheduler.mjs report-successes [--account-id ID] [--date YYYY-MM-DD] [--dry-run]');
+  console.error('  node repliz_ibnu/scripts/repliz-slot-scheduler.mjs run-comment-worker-once [--account-id ID] [--limit 20] [--dry-run]');
   process.exit(1);
 }
 
@@ -301,13 +329,18 @@ async function reportDay({ accountId, date }) {
   };
 }
 
-async function processComments({ accountId, dryRun, limit }) {
+async function processComments({ accountId, dryRun, limit, alreadyProcessedIds = new Set() }) {
   const account = await resolveAccount(accountId);
   const queue = await fetchQueue(account._id, limit);
   const pending = (queue.docs ?? []).filter((item) => item.status === 'pending' || !item.status);
   const processed = [];
 
   for (const item of pending) {
+    if (alreadyProcessedIds.has(item._id)) {
+      processed.push({ id: item._id, action: 'skip-already-processed', preview: extractCommentText(item) });
+      continue;
+    }
+
     if (isOwnerComment(item, account)) {
       processed.push({ id: item._id, action: 'skip-owner', preview: extractCommentText(item) });
       continue;
@@ -339,6 +372,106 @@ async function processComments({ accountId, dryRun, limit }) {
     processedCount: processed.length,
     items: processed,
     note: 'Auto-like/love is not executed here because no supported Repliz API endpoint for reactions has been confirmed yet.'
+  };
+}
+
+async function reportSuccesses({ accountId, date, dryRun }) {
+  const report = await reportDay({ accountId, date });
+  const state = readJsonFile(reportStatePath, { deliveredIds: [], deliveredKeys: [] });
+  const deliveredIds = new Set(Array.isArray(state.deliveredIds) ? state.deliveredIds : []);
+  const deliveredKeys = new Set(Array.isArray(state.deliveredKeys) ? state.deliveredKeys : []);
+  const newlySucceededSlots = report.slots.filter((row) => row.status === 'success' && row.id && !deliveredIds.has(row.id));
+  const newlySucceededExtras = report.extraItems.filter((item) => item.status === 'success' && item.id && !deliveredIds.has(item.id));
+
+  const slotSummary = report.slots.map((row) => ({
+    localTime: row.localTime,
+    status: row.status,
+    title: row.title,
+    id: row.id,
+    kind: 'slot'
+  }));
+
+  const extraSummary = report.extraItems.map((item) => ({
+    localTime: item.localTime,
+    status: item.status,
+    title: item.title,
+    id: item.id,
+    kind: 'catch-up'
+  }));
+
+  const pendingDelivery = [
+    ...newlySucceededSlots.map((row) => ({ id: row.id, key: `slot:${row.localTime}:${row.id}`, label: `${row.localTime} ${row.title}` })),
+    ...newlySucceededExtras.map((item) => ({ id: item.id, key: `catch-up:${item.localTime}:${item.id}`, label: `${item.localTime} ${item.title}` }))
+  ].filter((item) => !deliveredKeys.has(item.key));
+
+  if (!pendingDelivery.length) {
+    return {
+      delivered: false,
+      dryRun,
+      reason: 'no-new-success',
+      localDate: report.localDate,
+      slotSummary,
+      extraSummary,
+      text: renderDayReportText({ account: report.account, localDate: report.localDate, slots: report.slots, extraItems: report.extraItems })
+    };
+  }
+
+  const text = renderTelegramSuccessText({
+    account: report.account,
+    localDate: report.localDate,
+    slots: report.slots,
+    extraItems: report.extraItems,
+    pendingDelivery
+  });
+
+  if (dryRun) {
+    return {
+      delivered: false,
+      dryRun: true,
+      reason: 'dry-run',
+      localDate: report.localDate,
+      pendingDelivery,
+      text
+    };
+  }
+
+  const sendResult = sendTelegramReport(text);
+  for (const item of pendingDelivery) {
+    if (item.id) deliveredIds.add(item.id);
+    deliveredKeys.add(item.key);
+  }
+  writeJsonFile(reportStatePath, {
+    deliveredIds: Array.from(deliveredIds),
+    deliveredKeys: Array.from(deliveredKeys)
+  });
+
+  return {
+    delivered: true,
+    dryRun: false,
+    localDate: report.localDate,
+    pendingDelivery,
+    text,
+    sendResult
+  };
+}
+
+async function runCommentWorkerOnce({ accountId, dryRun, limit }) {
+  const state = readJsonFile(commentStatePath, { repliedQueueIds: [] });
+  const repliedQueueIds = new Set(Array.isArray(state.repliedQueueIds) ? state.repliedQueueIds : []);
+  const result = await processComments({ accountId, dryRun, limit, alreadyProcessedIds: repliedQueueIds });
+
+  if (!dryRun) {
+    for (const item of result.items) {
+      if (item.action === 'replied' && item.id) {
+        repliedQueueIds.add(item.id);
+      }
+    }
+    writeJsonFile(commentStatePath, { repliedQueueIds: Array.from(repliedQueueIds) });
+  }
+
+  return {
+    ...result,
+    workerStatePath: commentStatePath
   };
 }
 
@@ -564,6 +697,7 @@ function renderDayReportText({ account, localDate, slots, extraItems }) {
   const lines = [];
   lines.push(`Laporan ${account.username} - ${localDate} WIB`);
   lines.push('');
+  lines.push('Slot reguler:');
 
   for (const row of slots) {
     const mark = row.checked ? '✅' : row.occupied ? '🕒' : '⬜';
@@ -579,12 +713,37 @@ function renderDayReportText({ account, localDate, slots, extraItems }) {
 
   if (extraItems.length) {
     lines.push('');
-    lines.push('Item non-slot:');
+    lines.push('Catch-up / non-slot:');
     for (const item of extraItems) {
       lines.push(`- ${item.localTime} - ${item.status} - ${sanitizeText(item.title || item.description || '(tanpa isi)')}`);
     }
   }
 
+  return lines.join('\n');
+}
+
+function renderTelegramSuccessText({ account, localDate, slots, extraItems, pendingDelivery }) {
+  const lines = [];
+  lines.push(`Laporan publish ${account.username} - ${localDate} WIB`);
+  lines.push('');
+  lines.push('Item baru sukses:');
+  for (const item of pendingDelivery) {
+    lines.push(`- ${sanitizeText(item.label)}`);
+  }
+  lines.push('');
+  lines.push('Ringkasan hari ini:');
+  for (const row of slots) {
+    const mark = row.status === 'success' ? '✅' : row.occupied ? '🕒' : '⬜';
+    lines.push(`${mark} ${row.localTime} - ${row.status}${row.title ? ` - ${sanitizeText(row.title)}` : ''}`);
+  }
+  if (extraItems.length) {
+    lines.push('');
+    lines.push('Catch-up / non-slot:');
+    for (const item of extraItems) {
+      const mark = item.status === 'success' ? '✅' : item.status === 'pending' ? '🕒' : '•';
+      lines.push(`${mark} ${item.localTime} - ${item.status}${item.title ? ` - ${sanitizeText(item.title)}` : ''}`);
+    }
+  }
   return lines.join('\n');
 }
 
@@ -662,6 +821,49 @@ function sanitizeText(text) {
   const trimmed = String(text ?? '').trim();
   if (!config.sanitizeChineseCharacters) return trimmed;
   return trimmed.replace(/[\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF]/g, '').replace(/\s{2,}/g, ' ').trim();
+}
+
+function sendTelegramReport(text) {
+  const replyTo = process.env.REPLIZ_TELEGRAM_REPORT_TO ?? 'telegram:6186239554';
+  const commandArgs = ['agent', '--message', sanitizeText(text), '--deliver', '--reply-channel', 'telegram', '--reply-to', replyTo];
+  const result = spawnSync('openclaw', commandArgs, {
+    cwd: workspaceRoot,
+    env: process.env,
+    encoding: 'utf8',
+    timeout: 120000
+  });
+
+  if (result.error) {
+    throw result.error;
+  }
+
+  if (result.status !== 0) {
+    throw new Error(`openclaw agent failed (${result.status}): ${(result.stderr || result.stdout || '').trim()}`);
+  }
+
+  return {
+    command: ['openclaw', ...commandArgs].join(' '),
+    stdout: (result.stdout ?? '').trim(),
+    stderr: (result.stderr ?? '').trim()
+  };
+}
+
+function ensureDir(dirPath) {
+  fs.mkdirSync(dirPath, { recursive: true });
+}
+
+function readJsonFile(filePath, fallback) {
+  if (!fs.existsSync(filePath)) return fallback;
+  try {
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  } catch {
+    return fallback;
+  }
+}
+
+function writeJsonFile(filePath, value) {
+  ensureDir(path.dirname(filePath));
+  fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`);
 }
 
 async function api(resource, options = {}) {
