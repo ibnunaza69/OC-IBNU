@@ -1,0 +1,77 @@
+{
+  "productName": "Nama produk",
+  "style": "v3",
+  "affiliateLink": "https://contoh-link-affiliate",
+  "slots": [
+    {
+      "time": "05:00",
+      "title": "Judul slot 05:00",
+      "description": "Main post slot 05:00",
+      "replies": [
+        "Reply 1",
+        "Reply 2",
+        "Reply 3 + CTA"
+      ]
+    },
+    {
+      "time": "08:00",
+      "title": "Judul slot 08:00",
+      "description": "Main post slot 08:00",
+      "replies": [
+        "Reply 1",
+        "Reply 2",
+        "Reply 3 + CTA"
+      ]
+    },
+    {
+      "time": "11:00",
+      "title": "Judul slot 11:00",
+      "description": "Main post slot 11:00",
+      "replies": [
+        "Reply 1",
+        "Reply 2",
+        "Reply 3 + CTA"
+      ]
+    },
+    {
+      "time": "14:00",
+      "title": "Judul slot 14:00",
+      "description": "Main post slot 14:00",
+      "replies": [
+        "Reply 1",
+        "Reply 2",
+        "Reply 3 + CTA"
+      ]
+    },
+    {
+      "time": "17:00",
+      "title": "Judul slot 17:00",
+      "description": "Main post slot 17:00",
+      "replies": [
+        "Reply 1",
+        "Reply 2",
+        "Reply 3 + CTA"
+      ]
+    },
+    {
+      "time": "20:00",
+      "title": "Judul slot 20:00",
+      "description": "Main post slot 20:00",
+      "replies": [
+        "Reply 1",
+        "Reply 2",
+        "Reply 3 + CTA"
+      ]
+    },
+    {
+      "time": "23:00",
+      "title": "Judul slot 23:00",
+      "description": "Main post slot 23:00",
+      "replies": [
+        "Reply 1",
+        "Reply 2",
+        "Reply 3 + CTA"
+      ]
+    }
+  ]
+}

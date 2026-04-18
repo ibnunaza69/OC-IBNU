@@ -28,6 +28,8 @@ Logika slot, timezone, horizon scheduling, dan kebijakan queue hidup.
 - Dengan preferensi baru Abi, slot lain bukan lagi cadangan; semuanya harus dianggap aktif.
 - Karena Abi minta materi harian berbeda-beda, generator topik juga perlu guard agar distribusi tema tidak monoton.
 - `ensure-horizon` dan reporting harus direvisi bersama supaya queue dan laporan tidak saling bertentangan.
+- Jalur operasional baru untuk affiliate product-day sudah mulai ditambahkan: satu file JSON produk bisa dipakai untuk memasang 7 slot reguler (`schedule-product-day`) dan satu slot catch-up manual (`catch-up-product-slot`).
+- Template dasar product-day sekarang ada di `../02_content_strategy/product-day-template-v3.json` dan contoh nyata pertamanya ada di `../02_content_strategy/madu-zestmag-v3.json`.
 
 ## Operational cautions
 - Jangan asumsikan perubahan timezone otomatis menggeser queue live; audit dulu.

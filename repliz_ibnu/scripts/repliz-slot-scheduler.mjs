@@ -155,6 +155,36 @@ async function main() {
     return;
   }
 
+  if (command === 'schedule-product-day') {
+    const accountId = getOption('--account-id');
+    const date = getOption('--date');
+    const filePath = getOption('--file');
+    const dryRun = hasFlag('--dry-run');
+    const replacePending = hasFlag('--replace-pending');
+    if (!filePath || !date) {
+      console.error('Missing --file or --date');
+      process.exit(1);
+    }
+    const result = await scheduleProductDay({ accountId, date, filePath, dryRun, replacePending });
+    console.log(JSON.stringify(result, null, 2));
+    return;
+  }
+
+  if (command === 'catch-up-product-slot') {
+    const accountId = getOption('--account-id');
+    const date = getOption('--date');
+    const filePath = getOption('--file');
+    const slotTime = getOption('--slot');
+    const dryRun = hasFlag('--dry-run');
+    if (!filePath || !date || !slotTime) {
+      console.error('Missing --file, --date, or --slot');
+      process.exit(1);
+    }
+    const result = await catchUpProductSlot({ accountId, date, filePath, slotTime, dryRun });
+    console.log(JSON.stringify(result, null, 2));
+    return;
+  }
+
   if (command === 'process-comments') {
     const accountId = getOption('--account-id');
     const dryRun = hasFlag('--dry-run');
@@ -193,6 +223,8 @@ async function main() {
   console.error('  node repliz_ibnu/scripts/repliz-slot-scheduler.mjs schedule-daily-nested [--account-id ID] [--slug TOPIC_SLUG] [--dry-run]');
   console.error('  node repliz_ibnu/scripts/repliz-slot-scheduler.mjs report-day [--account-id ID] [--date YYYY-MM-DD]');
   console.error('  node repliz_ibnu/scripts/repliz-slot-scheduler.mjs report-day-text [--account-id ID] [--date YYYY-MM-DD]');
+  console.error('  node repliz_ibnu/scripts/repliz-slot-scheduler.mjs schedule-product-day --file FILE --date YYYY-MM-DD [--account-id ID] [--replace-pending] [--dry-run]');
+  console.error('  node repliz_ibnu/scripts/repliz-slot-scheduler.mjs catch-up-product-slot --file FILE --date YYYY-MM-DD --slot HH:MM [--account-id ID] [--dry-run]');
   console.error('  node repliz_ibnu/scripts/repliz-slot-scheduler.mjs process-comments [--account-id ID] [--limit 20] [--dry-run]');
   console.error('  node repliz_ibnu/scripts/repliz-slot-scheduler.mjs report-successes [--account-id ID] [--date YYYY-MM-DD] [--dry-run]');
   console.error('  node repliz_ibnu/scripts/repliz-slot-scheduler.mjs run-comment-worker-once [--account-id ID] [--limit 20] [--dry-run]');
@@ -326,6 +358,116 @@ async function reportDay({ accountId, date }) {
     slots: slotRows,
     extraItems,
     text: renderDayReportText({ account, localDate: targetDate, slots: slotRows, extraItems })
+  };
+}
+
+async function scheduleProductDay({ accountId, date, filePath, dryRun, replacePending }) {
+  const account = await resolveAccount(accountId);
+  const report = await reportDay({ accountId: account._id, date });
+  const product = loadProductDayFile(filePath);
+  const created = [];
+  const deleted = [];
+  const skipped = [];
+
+  for (const slot of product.slots) {
+    const slotKey = `${date} ${slot.time}`;
+    const existing = report.slots.find((row) => row.slotKey === slotKey);
+    if (!existing) {
+      skipped.push({ slotKey, action: 'skip-no-slot-row' });
+      continue;
+    }
+
+    if (existing.status === 'success') {
+      skipped.push({ slotKey, action: 'skip-success', existingId: existing.id, existingTitle: existing.title });
+      continue;
+    }
+
+    if (existing.occupied && existing.status !== 'pending') {
+      skipped.push({ slotKey, action: 'skip-non-pending', existingId: existing.id, existingStatus: existing.status, existingTitle: existing.title });
+      continue;
+    }
+
+    if (existing.occupied && existing.status === 'pending' && !replacePending) {
+      skipped.push({ slotKey, action: 'skip-pending-no-replace', existingId: existing.id, existingTitle: existing.title });
+      continue;
+    }
+
+    const scheduleAt = localDateTimeToUtcIso(date, slot.time);
+    const payload = buildProductSchedulePayload({ accountId: account._id, slot, scheduleAt });
+
+    if (dryRun) {
+      if (existing.occupied && existing.id) {
+        deleted.push({ dryRun: true, slotKey, id: existing.id, title: existing.title });
+      }
+      created.push({ dryRun: true, slotKey, payload });
+      continue;
+    }
+
+    if (existing.occupied && existing.id) {
+      await api(`/public/schedule/${existing.id}`, { method: 'DELETE' });
+      deleted.push({ dryRun: false, slotKey, id: existing.id, title: existing.title });
+    }
+
+    const result = await api('/public/schedule', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+    created.push({ dryRun: false, slotKey, id: result._id ?? result.id ?? null, title: payload.title });
+  }
+
+  return {
+    account,
+    localDate: date,
+    filePath: path.resolve(filePath),
+    dryRun,
+    replacePending,
+    productName: product.productName,
+    deleted,
+    created,
+    skipped
+  };
+}
+
+async function catchUpProductSlot({ accountId, date, filePath, slotTime, dryRun }) {
+  const account = await resolveAccount(accountId);
+  const product = loadProductDayFile(filePath);
+  const slot = product.slots.find((item) => item.time === slotTime);
+  if (!slot) {
+    throw new Error(`Slot ${slotTime} not found in ${filePath}`);
+  }
+
+  const now = new Date().toISOString();
+  const payload = buildProductSchedulePayload({ accountId: account._id, slot, scheduleAt: now });
+
+  if (dryRun) {
+    return {
+      account,
+      localDate: date,
+      slotTime,
+      filePath: path.resolve(filePath),
+      dryRun: true,
+      catchUp: true,
+      payload
+    };
+  }
+
+  const result = await api('/public/schedule', {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  });
+
+  return {
+    account,
+    localDate: date,
+    slotTime,
+    filePath: path.resolve(filePath),
+    dryRun: false,
+    catchUp: true,
+    created: {
+      id: result._id ?? result.id ?? null,
+      title: payload.title,
+      scheduleAt: now
+    }
   };
 }
 
@@ -830,6 +972,57 @@ function sanitizeText(text) {
   const trimmed = String(text ?? '').trim();
   if (!config.sanitizeChineseCharacters) return trimmed;
   return trimmed.replace(/[\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF]/g, '').replace(/\s{2,}/g, ' ').trim();
+}
+
+function buildProductSchedulePayload({ accountId, slot, scheduleAt }) {
+  return {
+    accountId,
+    title: sanitizeText(slot.title),
+    description: sanitizeText(slot.description),
+    type: 'text',
+    medias: [],
+    scheduleAt,
+    replies: (slot.replies ?? []).map((text) => ({
+      title: '',
+      description: sanitizeText(text),
+      type: 'text',
+      medias: []
+    }))
+  };
+}
+
+function loadProductDayFile(filePath) {
+  const resolved = path.resolve(filePath);
+  const parsed = JSON.parse(fs.readFileSync(resolved, 'utf8'));
+  if (!parsed || !Array.isArray(parsed.slots)) {
+    throw new Error(`Invalid product day file: ${resolved}`);
+  }
+
+  const slots = parsed.slots.map((slot) => {
+    if (!slot?.time || !slot?.title || !slot?.description) {
+      throw new Error(`Invalid slot entry in ${resolved}`);
+    }
+    return {
+      time: String(slot.time),
+      title: String(slot.title),
+      description: String(slot.description),
+      replies: Array.isArray(slot.replies) ? slot.replies.map((item) => String(item)) : []
+    };
+  });
+
+  return {
+    productName: parsed.productName ?? '',
+    style: parsed.style ?? '',
+    affiliateLink: parsed.affiliateLink ?? '',
+    slots
+  };
+}
+
+function localDateTimeToUtcIso(localDate, localTime) {
+  const [year, month, day] = localDate.split('-').map(Number);
+  const [hour, minute] = localTime.split(':').map(Number);
+  const utcMs = Date.UTC(year, month - 1, day, hour, minute, 0, 0) - config.timezoneOffsetMinutes * 60_000;
+  return new Date(utcMs).toISOString();
 }
 
 function sendTelegramReport(text) {

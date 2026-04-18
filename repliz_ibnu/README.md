@@ -24,9 +24,22 @@ node repliz_ibnu/scripts/repliz-slot-scheduler.mjs slots --days 3
 node repliz_ibnu/scripts/repliz-slot-scheduler.mjs preview-daily-nested
 node repliz_ibnu/scripts/repliz-slot-scheduler.mjs ensure-horizon --days 30 --dry-run
 node repliz_ibnu/scripts/repliz-slot-scheduler.mjs report-day-text --date 2026-04-17
+node repliz_ibnu/scripts/repliz-slot-scheduler.mjs schedule-product-day --file repliz_ibnu/02_content_strategy/madu-zestmag-v3.json --date 2026-04-18 --replace-pending --dry-run
+node repliz_ibnu/scripts/repliz-slot-scheduler.mjs catch-up-product-slot --file repliz_ibnu/02_content_strategy/madu-zestmag-v3.json --date 2026-04-18 --slot 08:00 --dry-run
 node repliz_ibnu/scripts/repliz-slot-scheduler.mjs report-successes --dry-run
 node repliz_ibnu/scripts/repliz-slot-scheduler.mjs run-comment-worker-once --dry-run --limit 20
 ```
+
+## Workflow produk affiliate: 1 produk = 1 hari = 7 slot style v3
+1. Siapkan file JSON produk dari template:
+   - `repliz_ibnu/02_content_strategy/product-day-template-v3.json`
+2. Isi `productName`, `affiliateLink`, lalu 7 slot (`05:00` s.d. `23:00`) dengan gaya v3.
+3. Untuk pasang ke slot reguler hari target:
+   - `node repliz_ibnu/scripts/repliz-slot-scheduler.mjs schedule-product-day --file repliz_ibnu/02_content_strategy/<nama-file>.json --date YYYY-MM-DD --replace-pending`
+4. Untuk membereskan slot yang sudah lewat sebagai catch-up:
+   - `node repliz_ibnu/scripts/repliz-slot-scheduler.mjs catch-up-product-slot --file repliz_ibnu/02_content_strategy/<nama-file>.json --date YYYY-MM-DD --slot HH:MM`
+5. Cek hasil akhirnya:
+   - `node repliz_ibnu/scripts/repliz-slot-scheduler.mjs report-day --date YYYY-MM-DD`
 
 ## Runtime workers
 - `scripts/repliz-daily-cron.sh` — isi horizon + kirim auto-report Telegram + jalankan worker komentar sekali per trigger
