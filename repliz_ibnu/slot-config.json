@@ -1,4 +1,6 @@
 {
+  "timezone": "Asia/Jakarta",
+  "timezoneLabel": "WIB",
   "timezoneOffsetMinutes": 420,
   "slotCount": 7,
   "startHour": 5,
