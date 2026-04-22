@@ -102,18 +102,22 @@ CTA harus:
 - selalu di akhir
 - lembut
 - tidak memaksa
-- terasa seperti rekomendasi
+- terasa seperti rekomendasi personal
+- memberi kesan "kalau butuh, ini yang aku sarankan"
 
 Format CTA yang aman:
-- "Kalau mau cek produk yang lagi aku bahas, linknya ada di sini ya: ..."
-- "Kalau mau lihat produk yang relevan dengan topik ini, cek di sini ya: ..."
-- "Kalau mau cek yang lagi dibahas di thread ini, linknya aku taruh di sini ya: ..."
+- "Kalau Abi cari pendamping yang lebih nyaman buat topik ini, yang ini layak dipertimbangkan: ..."
+- "Kalau mau pakai yang komposisinya relevan dengan bahasan ini, aku lebih merekomendasikan yang ini: ..."
+- "Kalau sedang cari pendamping untuk keluhan seperti ini, opsi yang ini menurutku paling nyambung: ..."
+- "Kalau mau lihat produk yang menurutku cocok untuk topik ini, cek di sini ya: ..."
+- "Kalau mau cek rekomendasi yang lagi aku bahas di thread ini, linknya aku taruh di sini ya: ..."
 
 Hindari CTA seperti:
 - "Buruan beli sekarang"
 - "Wajib punya"
 - "Pasti sembuh"
 - "Solusi terbaik"
+- "Harus pakai ini"
 
 ## Mapping slot harian
 ### 05:00

@@ -74,16 +74,21 @@ Rumus umum:
 - Post akhir = CTA affiliate yang lembut
 
 ## Aturan CTA
+Gunakan CTA bernada merekomendasikan, bukan hanya menyuruh cek link.
+
 Gunakan variasi CTA seperti:
-- Kalau mau cek produk yang lagi aku bahas, linknya ada di sini ya: [AFFILIATE_LINK]
-- Kalau mau lihat produk yang relevan dengan topik ini, cek di sini ya: [AFFILIATE_LINK]
-- Kalau mau cek yang lagi dibahas di thread ini, linknya aku taruh di sini ya: [AFFILIATE_LINK]
+- Kalau sedang cari pendamping yang lebih nyambung untuk topik ini, aku lebih merekomendasikan yang ini: [AFFILIATE_LINK]
+- Kalau mau pakai yang komposisinya relevan dengan bahasan ini, yang ini menurutku layak dipertimbangkan: [AFFILIATE_LINK]
+- Kalau lagi butuh opsi yang terasa lebih akrab dan nyaman untuk topik ini, aku cenderung merekomendasikan yang ini: [AFFILIATE_LINK]
+- Kalau mau lihat produk yang menurutku cocok untuk keluhan seperti ini, cek di sini ya: [AFFILIATE_LINK]
+- Kalau mau cek rekomendasi yang lagi aku bahas di thread ini, linknya aku taruh di sini ya: [AFFILIATE_LINK]
 
 Jangan gunakan CTA keras seperti:
 - buruan beli
 - wajib punya
 - pasti sembuh
 - solusi terbaik
+- harus pakai ini
 
 ## Output yang diminta
 Buat 7 slot untuk 1 hari penuh dalam format JSON dengan struktur:
