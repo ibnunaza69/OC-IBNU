@@ -60,9 +60,36 @@ Bank hook internal untuk Threads Abi.
 49. Banyak orang kira rasa kurang nyaman itu hal biasa, padahal tubuh sering sedang minta pola hidup yang lebih rapi.
 50. Kalau ingin badan terasa lebih nyaman, sering kali mulainya justru dari ritme hidup yang lebih stabil.
 
+## Contoh CTA rekomendasi
+Gunakan CTA bernada rekomendasi di post terakhir, bukan di hook.
+
+### CTA umum
+- Kalau sedang cari pendamping yang lebih nyambung untuk topik ini, aku lebih merekomendasikan yang ini: [LINK]
+- Kalau mau pakai yang komposisinya relevan dengan bahasan ini, yang ini menurutku layak dipertimbangkan: [LINK]
+- Kalau lagi butuh opsi yang terasa lebih akrab dan nyaman untuk topik ini, aku cenderung merekomendasikan yang ini: [LINK]
+- Kalau mau lihat produk yang menurutku cocok untuk keluhan seperti ini, cek di sini ya: [LINK]
+- Kalau mau cek rekomendasi yang lagi aku bahas di thread ini, linknya aku taruh di sini ya: [LINK]
+
+### CTA ZESTMAG
+- Kalau sedang cari pendamping yang lebih nyambung untuk topik lambung seperti ini, aku lebih merekomendasikan yang ini: [LINK]
+- Kalau mau pakai yang menurutku lebih cocok untuk lambung sensitif dan ritme makan yang berantakan, yang ini layak dipertimbangkan: [LINK]
+
+### CTA GURAHFIT
+- Kalau sedang cari pendamping yang lebih nyambung untuk topik pernapasan seperti ini, aku lebih merekomendasikan yang ini: [LINK]
+- Kalau lagi butuh opsi yang terasa lebih akrab dan nyaman untuk tenggorokan atau napas, aku cenderung merekomendasikan yang ini: [LINK]
+
+### CTA JAMKORAT
+- Kalau sedang cari pendamping yang lebih nyambung untuk badan yang terasa berat atau kurang nyaman bergerak, aku lebih merekomendasikan yang ini: [LINK]
+- Kalau mau pakai yang menurutku cocok untuk bantu jaga ritme tubuh seperti ini, yang ini layak dipertimbangkan: [LINK]
+
+### CTA NURUTENZ
+- Kalau sedang cari pendamping yang lebih nyambung untuk badan yang sering terasa tegang atau kurang nyaman, aku lebih merekomendasikan yang ini: [LINK]
+- Kalau mau pakai yang menurutku cocok untuk topik ritme tubuh dan tekanan seperti ini, yang ini layak dipertimbangkan: [LINK]
+
 ## Catatan pakai
 - Pilih hook sesuai slot psikologis harian.
 - Untuk slot 05:00 dan 14:00, hook listicle / checklist biasanya lebih cocok.
 - Untuk slot 17:00 dan 20:00, hook observasional dan emotional resonance biasanya lebih kuat.
 - Untuk slot 23:00, gunakan hook reflektif dan penutup yang lebih lembut.
 - CTA tetap ditaruh di post terakhir, bukan di hook.
+- Untuk batch baru, gunakan default CTA bernada rekomendasi, bukan sekadar menyuruh cek link.
