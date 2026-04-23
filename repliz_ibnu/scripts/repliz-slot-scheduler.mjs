@@ -233,20 +233,21 @@ async function main() {
 
 async function getNextAvailableSlot({ accountId }) {
   const account = await resolveAccount(accountId);
+  const slotRules = getSlotRules(account);
   const schedules = await fetchSchedules(account._id, 500);
-  const occupied = buildOccupiedSlotKeySet(schedules.docs ?? []);
+  const occupied = buildOccupiedSlotKeySet(schedules.docs ?? [], slotRules);
 
   const now = new Date();
   const maxDaysToSearch = 30;
   for (let dayOffset = 0; dayOffset < maxDaysToSearch; dayOffset += 1) {
-    const slots = buildDaySlots(now, dayOffset);
+    const slots = buildDaySlots(now, dayOffset, slotRules);
     for (const slot of slots) {
       if (slot.utcMs <= Date.now()) continue;
       if (!occupied.has(slot.slotKey)) {
         return {
           account,
           slot,
-          slotRules: config,
+          slotRules,
           checkedScheduleCount: schedules.docs?.length ?? 0
         };
       }
@@ -258,13 +259,14 @@ async function getNextAvailableSlot({ accountId }) {
 
 async function inspectSlots({ accountId, days }) {
   const account = await resolveAccount(accountId);
+  const slotRules = getSlotRules(account);
   const schedules = await fetchSchedules(account._id, 500);
-  const occupied = buildOccupiedSlotKeySet(schedules.docs ?? []);
+  const occupied = buildOccupiedSlotKeySet(schedules.docs ?? [], slotRules);
   const today = new Date();
   const output = [];
 
   for (let dayOffset = 0; dayOffset < days; dayOffset += 1) {
-    for (const slot of buildDaySlots(today, dayOffset)) {
+    for (const slot of buildDaySlots(today, dayOffset, slotRules)) {
       output.push({
         ...slot,
         occupied: occupied.has(slot.slotKey)
@@ -274,7 +276,7 @@ async function inspectSlots({ accountId, days }) {
 
   return {
     account,
-    slotRules: config,
+    slotRules,
     checkedScheduleCount: schedules.docs?.length ?? 0,
     slots: output
   };
@@ -282,9 +284,10 @@ async function inspectSlots({ accountId, days }) {
 
 async function ensureHorizon({ accountId, days, dryRun }) {
   const account = await resolveAccount(accountId);
+  const slotRules = getSlotRules(account);
   const schedules = await fetchSchedules(account._id, 500);
-  const occupied = buildOccupiedSlotKeySet(schedules.docs ?? []);
-  const targetSlots = listTargetSlots(occupied, days);
+  const occupied = buildOccupiedSlotKeySet(schedules.docs ?? [], slotRules);
+  const targetSlots = listTargetSlots(occupied, days, slotRules);
   const created = [];
   const dayUsedSlugs = buildDayUsedSlugsMap(schedules.docs ?? []);
 
@@ -320,15 +323,16 @@ async function ensureHorizon({ accountId, days, dryRun }) {
 
 async function reportDay({ accountId, date }) {
   const account = await resolveAccount(accountId);
+  const slotRules = getSlotRules(account);
   const schedules = await fetchSchedules(account._id, 500);
   const targetDate = date ?? currentLocalDateString(new Date());
-  const daySlots = buildDaySlots(fromLocalDateString(targetDate), 0);
+  const daySlots = buildDaySlots(fromLocalDateString(targetDate), 0, slotRules);
   const dayItems = (schedules.docs ?? [])
     .filter((item) => mapItemToDay(item)?.localDate === targetDate)
     .sort((a, b) => new Date(a.scheduleAt ?? a.createdAt).getTime() - new Date(b.scheduleAt ?? b.createdAt).getTime());
 
   const slotRows = daySlots.map((slot) => {
-    const match = dayItems.find((item) => mapItemToSlotKey(item) === slot.slotKey);
+    const match = dayItems.find((item) => mapItemToSlotKey(item, slotRules) === slot.slotKey);
     return {
       slotKey: slot.slotKey,
       localTime: slot.localTime,
@@ -710,12 +714,12 @@ function buildNestedPayload(topic, next) {
   };
 }
 
-function listTargetSlots(occupied, days) {
+function listTargetSlots(occupied, days, slotRules = config) {
   const today = new Date();
   const output = [];
 
   for (let dayOffset = 0; dayOffset < days; dayOffset += 1) {
-    const daySlots = buildDaySlots(today, dayOffset);
+    const daySlots = buildDaySlots(today, dayOffset, slotRules);
     for (const slot of daySlots) {
       if (slot.utcMs <= Date.now()) continue;
       if (occupied.has(slot.slotKey)) continue;
@@ -761,10 +765,10 @@ function mapItemToDay(item) {
   };
 }
 
-function mapItemToSlotKey(item) {
+function mapItemToSlotKey(item, slotRules = config) {
   const when = item.scheduleAt ?? item.createdAt;
   if (!when) return null;
-  const slot = mapDateToSlot(new Date(when));
+  const slot = mapDateToSlot(new Date(when), slotRules);
   return slot?.slotKey ?? null;
 }
 
@@ -772,30 +776,37 @@ function mapItemToLocalTime(item) {
   return mapItemToDay(item)?.localTime ?? null;
 }
 
-function buildOccupiedSlotKeySet(schedules) {
+function buildOccupiedSlotKeySet(schedules, slotRules = config) {
   const set = new Set();
   for (const item of schedules) {
     const when = item.scheduleAt ?? item.createdAt;
     if (!when) continue;
-    const slot = mapDateToSlot(new Date(when));
+    const slot = mapDateToSlot(new Date(when), slotRules);
     if (slot) set.add(slot.slotKey);
   }
   return set;
 }
 
-function buildDaySlots(referenceDate, dayOffset) {
+function buildDaySlots(referenceDate, dayOffset, slotRules = config) {
   const localBase = toOffsetDateParts(referenceDate, config.timezoneOffsetMinutes);
   const targetDay = addLocalDays(localBase, dayOffset);
   const slots = [];
+  const startHour = Number(slotRules.startHour ?? config.startHour ?? 5);
+  const startMinute = Number(slotRules.startMinute ?? config.startMinute ?? 0);
+  const intervalHours = Number(slotRules.intervalHours ?? config.intervalHours ?? 3);
+  const slotCount = Number(slotRules.slotCount ?? config.slotCount ?? 7);
+  const startTotalMinutes = startHour * 60 + startMinute;
 
-  for (let i = 0; i < config.slotCount; i += 1) {
-    const hour = config.startHour + (i * config.intervalHours);
+  for (let i = 0; i < slotCount; i += 1) {
+    const totalMinutes = startTotalMinutes + (i * intervalHours * 60);
+    const hour = Math.floor(totalMinutes / 60);
+    const minute = totalMinutes % 60;
     const slotLocal = {
       year: targetDay.year,
       month: targetDay.month,
       day: targetDay.day,
       hour,
-      minute: 0,
+      minute,
       second: 0,
       ms: 0
     };
@@ -803,9 +814,9 @@ function buildDaySlots(referenceDate, dayOffset) {
     const slotDate = new Date(utcMs);
     slots.push({
       slotIndex: i + 1,
-      slotKey: `${targetDay.year}-${pad(targetDay.month)}-${pad(targetDay.day)} ${pad(hour)}:00`,
+      slotKey: `${targetDay.year}-${pad(targetDay.month)}-${pad(targetDay.day)} ${pad(hour)}:${pad(minute)}`,
       localDate: `${targetDay.year}-${pad(targetDay.month)}-${pad(targetDay.day)}`,
-      localTime: `${pad(hour)}:00`,
+      localTime: `${pad(hour)}:${pad(minute)}`,
       scheduleAtUtc: slotDate.toISOString(),
       utcMs
     });
@@ -816,23 +827,34 @@ function buildDaySlots(referenceDate, dayOffset) {
 
 function buildSlotSeed(slot) {
   const [year, month, day] = slot.localDate.split('-').map(Number);
-  const hour = Number(slot.localTime.split(':')[0]);
-  return Date.UTC(year, month - 1, day, 0, 0, 0, 0) / 86400000 * 100 + hour;
+  const [hour, minute] = slot.localTime.split(':').map(Number);
+  return Date.UTC(year, month - 1, day, 0, 0, 0, 0) / 86400000 * 10000 + (hour * 100) + minute;
 }
 
-function mapDateToSlot(date) {
+function mapDateToSlot(date, slotRules = config) {
   const parts = toOffsetDateParts(date, config.timezoneOffsetMinutes);
-  if (parts.minute !== 0) return null;
-  if (parts.hour < config.startHour) return null;
-  const delta = parts.hour - config.startHour;
-  if (delta % config.intervalHours !== 0) return null;
-  const slotIndex = (delta / config.intervalHours) + 1;
-  if (slotIndex < 1 || slotIndex > config.slotCount) return null;
+  const startHour = Number(slotRules.startHour ?? config.startHour ?? 5);
+  const startMinute = Number(slotRules.startMinute ?? config.startMinute ?? 0);
+  const intervalHours = Number(slotRules.intervalHours ?? config.intervalHours ?? 3);
+  const slotCount = Number(slotRules.slotCount ?? config.slotCount ?? 7);
+  const minuteOfDay = (parts.hour * 60) + parts.minute;
+  const startMinuteOfDay = (startHour * 60) + startMinute;
+  if (minuteOfDay < startMinuteOfDay) return null;
+  const delta = minuteOfDay - startMinuteOfDay;
+  const intervalMinutes = intervalHours * 60;
+  if (delta % intervalMinutes !== 0) return null;
+  const slotIndex = (delta / intervalMinutes) + 1;
+  if (slotIndex < 1 || slotIndex > slotCount) return null;
 
   return {
     slotIndex,
-    slotKey: `${parts.year}-${pad(parts.month)}-${pad(parts.day)} ${pad(parts.hour)}:00`
+    slotKey: `${parts.year}-${pad(parts.month)}-${pad(parts.day)} ${pad(parts.hour)}:${pad(parts.minute)}`
   };
+}
+
+function getSlotRules(account) {
+  if (!account?._id) return config;
+  return config.accountRules?.[account._id] ?? config;
 }
 
 function renderDayReportText({ account, localDate, slots, extraItems }) {

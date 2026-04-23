@@ -4,11 +4,28 @@
   "timezoneOffsetMinutes": 420,
   "slotCount": 7,
   "startHour": 5,
+  "startMinute": 0,
   "intervalHours": 3,
   "defaultType": "text",
   "defaultTitle": "",
   "sanitizeChineseCharacters": true,
   "nestedThreadLength": 4,
   "dailyNestedEnabled": true,
-  "dailyTopicFile": "/root/.openclaw/workspace/repliz_ibnu/daily-topics.json"
+  "dailyTopicFile": "/root/.openclaw/workspace/repliz_ibnu/daily-topics.json",
+  "accountRules": {
+    "69e0433f84ebdfba15123ba2": {
+      "label": "azzamsalmamulia",
+      "slotCount": 7,
+      "startHour": 5,
+      "startMinute": 0,
+      "intervalHours": 3
+    },
+    "69e655c784ebdfba15667ece": {
+      "label": "bekasberkualitas1224",
+      "slotCount": 7,
+      "startHour": 5,
+      "startMinute": 30,
+      "intervalHours": 3
+    }
+  }
 }
