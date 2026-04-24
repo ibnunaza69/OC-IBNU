@@ -1,0 +1,58 @@
+{
+  "meta": {
+    "title": "Belajar konten Canva untuk pemula",
+    "subtitle": "Animasi, carousel, dan infografis",
+    "ratio": "9:16",
+    "fps": 30
+  },
+  "brand": {
+    "name": "Canva Belajar Harian",
+    "handle": "@canvabelajar"
+  },
+  "palette": {
+    "background": "#0B1020",
+    "panel": "#111A33",
+    "primary": "#7DD3FC",
+    "secondary": "#FDE68A",
+    "text": "#F8FAFC",
+    "mutedText": "#CBD5E1"
+  },
+  "cta": {
+    "label": "Komentar",
+    "keyword": "IKUT"
+  },
+  "scenes": [
+    {
+      "kind": "hook",
+      "title": "Konten menarik tidak harus ribet",
+      "body": "Mulai dari format yang paling gampang, tapi tetap kelihatan niat.",
+      "durationInFrames": 75
+    },
+    {
+      "kind": "feature-list",
+      "title": "Yang bisa dipelajari",
+      "items": [
+        "Animasi teks sederhana",
+        "Carousel edukasi yang enak di-swipe",
+        "Infografis buat creator dan affiliator"
+      ],
+      "durationInFrames": 105
+    },
+    {
+      "kind": "audience",
+      "title": "Cocok buat siapa?",
+      "items": [
+        "Animator pemula",
+        "Content creator",
+        "Affiliator dan seller online"
+      ],
+      "durationInFrames": 90
+    },
+    {
+      "kind": "cta",
+      "title": "Kalau mau belajar workflow-nya",
+      "body": "Tinggal komentar keyword di bawah, nanti diarahkan ke langkah berikutnya.",
+      "durationInFrames": 90
+    }
+  ]
+}
