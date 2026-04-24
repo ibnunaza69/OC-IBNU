@@ -11,6 +11,7 @@
     "props:sample": "node scripts/make-props.mjs examples/briefs/canva-animasi.json examples/props/canva-animasi.json",
     "quick:quote": "node scripts/generate-quick-render.mjs examples/briefs/quick-quote-brief.json examples/props/generated-quote.json",
     "quick:carousel": "node scripts/generate-quick-render.mjs examples/briefs/quick-carousel-brief.json examples/props/generated-carousel.json",
+    "batch:canva": "node scripts/batch-render-canva-pack.mjs",
     "lint:config": "node scripts/validate-env.mjs"
   },
   "dependencies": {

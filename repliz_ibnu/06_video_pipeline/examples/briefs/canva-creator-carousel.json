@@ -1,0 +1,28 @@
+{
+  "template": "carousel-teaser",
+  "title": "Canva creator carousel",
+  "titleText": "3 kunci bikin carousel yang enak di-swipe",
+  "kicker": "creator workflow",
+  "footerNote": "Format ini cocok untuk edukasi, promosi, dan bangun trust akun.",
+  "cta": {
+    "label": "Komentar",
+    "keyword": "MAU"
+  },
+  "slides": [
+    {
+      "title": "Hook harus bikin berhenti",
+      "body": "Slide pertama harus singkat, jelas, dan menyalakan rasa penasaran.",
+      "durationInFrames": 60
+    },
+    {
+      "title": "Satu slide satu ide",
+      "body": "Biar mudah dibaca, jangan terlalu banyak pesan dalam satu frame.",
+      "durationInFrames": 60
+    },
+    {
+      "title": "Akhiri dengan CTA",
+      "body": "Arahkan audiens untuk komentar, ikut grup, atau minta panduan lanjut.",
+      "durationInFrames": 60
+    }
+  ]
+}

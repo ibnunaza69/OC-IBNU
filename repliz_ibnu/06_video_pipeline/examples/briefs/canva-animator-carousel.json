@@ -1,0 +1,28 @@
+{
+  "template": "carousel-teaser",
+  "title": "Canva animator carousel",
+  "titleText": "Animasi sederhana bisa jadi modal konten harian",
+  "kicker": "animator pemula",
+  "footerNote": "Mulai dari motion ringan yang tetap kelihatan niat.",
+  "cta": {
+    "label": "Komentar",
+    "keyword": "ANIMASI"
+  },
+  "slides": [
+    {
+      "title": "Mulai dari gerak yang simpel",
+      "body": "Tidak harus rumit, yang penting ritmenya enak dilihat.",
+      "durationInFrames": 60
+    },
+    {
+      "title": "Teks dan visual harus seimbang",
+      "body": "Jangan sampai animasi ramai tapi pesannya tidak masuk.",
+      "durationInFrames": 60
+    },
+    {
+      "title": "Pakai template biar cepat",
+      "body": "Workflow yang rapi bikin konten harian lebih realistis dijalankan.",
+      "durationInFrames": 60
+    }
+  ]
+}

@@ -107,6 +107,33 @@ Props saat ini berisi:
 5. Hubungkan generator konten project Repliz ke format props JSON.
 6. Tambahkan asset library nyata: logo, background, music bed, icon pack.
 
+## Brief siap pakai untuk niche Canva / creator / affiliate
+Sudah disiapkan contoh brief berikut:
+- `examples/briefs/canva-affiliate-quote.json`
+- `examples/briefs/canva-creator-carousel.json`
+- `examples/briefs/canva-animator-carousel.json`
+
+Untuk render semuanya sekaligus:
+```bash
+npm run batch:canva
+```
+
+## Handoff ke workflow Repliz
+Render final otomatis masuk ke:
+```bash
+/root/.openclaw/workspace/repliz_ibnu/runtime/generated_videos/
+```
+
+Untuk menyiapkan payload schedule video Repliz:
+```bash
+node scripts/build-repliz-video-payload.mjs \
+  /root/.openclaw/workspace/repliz_ibnu/runtime/generated_videos/<nama-file>.mp4 \
+  examples/repliz/video-schedule-meta.example.json \
+  examples/repliz/video-schedule-payload.json
+```
+
+Catatan: Repliz perlu `medias[].url` yang bisa diakses publik. Jadi tahap ini baru menyiapkan payload/handoff internal. Untuk auto-post penuh, file video perlu dipindah dulu ke storage/CDN/URL publik.
+
 ## Future integration
 Scaffold ini sengaja dipisah agar nanti bisa dihubungkan ke:
 - generator ide/caption
