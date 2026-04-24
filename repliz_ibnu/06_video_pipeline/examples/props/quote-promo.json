@@ -1,0 +1,28 @@
+{
+  "meta": {
+    "title": "Quote promo Canva",
+    "ratio": "9:16",
+    "fps": 30,
+    "durationInFrames": 150
+  },
+  "brand": {
+    "name": "Canva Belajar Harian",
+    "handle": "@canvabelajar"
+  },
+  "palette": {
+    "background": "#081120",
+    "panel": "#101B37",
+    "primary": "#7DD3FC",
+    "secondary": "#FDE68A",
+    "text": "#F8FAFC",
+    "mutedText": "#CBD5E1"
+  },
+  "eyebrow": "untuk pemula",
+  "hook": "Konten yang rapi bikin tawaran terasa lebih meyakinkan",
+  "body": "Mulai dari video animasi ringan, carousel, sampai infografis yang lebih enak dilihat dan lebih cepat dibuat.",
+  "footerNote": "Cocok untuk creator, affiliator, dan penjual online.",
+  "cta": {
+    "label": "Komentar",
+    "keyword": "IKUT"
+  }
+}

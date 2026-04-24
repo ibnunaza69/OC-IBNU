@@ -1,0 +1,43 @@
+{
+  "meta": {
+    "title": "Carousel teaser Canva",
+    "ratio": "9:16",
+    "fps": 30
+  },
+  "palette": {
+    "background": "#081120",
+    "panel": "#101B37",
+    "primary": "#7DD3FC",
+    "secondary": "#FDE68A",
+    "text": "#F8FAFC",
+    "mutedText": "#CBD5E1"
+  },
+  "brand": {
+    "name": "Canva Belajar Harian",
+    "handle": "@canvabelajar"
+  },
+  "kicker": "teaser carousel",
+  "title": "Belajar bikin carousel yang enak di-swipe",
+  "footerNote": "Bisa dipakai untuk edukasi, jualan, dan personal branding.",
+  "cta": {
+    "label": "Komentar",
+    "keyword": "MAU"
+  },
+  "slides": [
+    {
+      "title": "Hook yang bikin orang berhenti",
+      "body": "Slide pertama harus jelas, singkat, dan bikin penasaran.",
+      "durationInFrames": 60
+    },
+    {
+      "title": "Isi yang gampang dipahami",
+      "body": "Tiap slide cukup satu ide utama supaya tidak terasa penuh.",
+      "durationInFrames": 60
+    },
+    {
+      "title": "Akhiri dengan CTA yang jelas",
+      "body": "Arahkan audiens untuk komentar atau ikut grup belajar.",
+      "durationInFrames": 60
+    }
+  ]
+}

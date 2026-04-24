@@ -6,7 +6,11 @@
   "scripts": {
     "dev": "remotion studio",
     "render:sample": "node scripts/render-sample.mjs",
+    "render:quote": "npx remotion render src/index.ts QuotePromoVertical out/quote-promo-sample.mp4 --props=examples/props/quote-promo.json",
+    "render:carousel": "npx remotion render src/index.ts CarouselTeaserVertical out/carousel-teaser-sample.mp4 --props=examples/props/carousel-teaser.json",
     "props:sample": "node scripts/make-props.mjs examples/briefs/canva-animasi.json examples/props/canva-animasi.json",
+    "quick:quote": "node scripts/generate-quick-render.mjs examples/briefs/quick-quote-brief.json examples/props/generated-quote.json",
+    "quick:carousel": "node scripts/generate-quick-render.mjs examples/briefs/quick-carousel-brief.json examples/props/generated-carousel.json",
     "lint:config": "node scripts/validate-env.mjs"
   },
   "dependencies": {

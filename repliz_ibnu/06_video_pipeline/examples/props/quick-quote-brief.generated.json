@@ -1,0 +1,28 @@
+{
+  "meta": {
+    "title": "Quote promo Canva",
+    "ratio": "9:16",
+    "fps": 30,
+    "durationInFrames": 150
+  },
+  "palette": {
+    "background": "#081120",
+    "panel": "#101B37",
+    "primary": "#7DD3FC",
+    "secondary": "#FDE68A",
+    "text": "#F8FAFC",
+    "mutedText": "#CBD5E1"
+  },
+  "brand": {
+    "name": "Canva Belajar Harian",
+    "handle": "@canvabelajar"
+  },
+  "eyebrow": "untuk pemula",
+  "hook": "Banyak orang gagal jualan bukan karena produknya jelek, tapi visualnya belum meyakinkan.",
+  "body": "Kalau mau belajar bikin konten yang lebih rapi dengan alur yang gampang, mulai dari format yang sederhana dulu.",
+  "footerNote": "Cocok untuk creator, affiliator, dan seller online.",
+  "cta": {
+    "label": "Komentar",
+    "keyword": "IKUT"
+  }
+}

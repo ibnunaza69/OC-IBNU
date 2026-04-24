@@ -1,0 +1,28 @@
+{
+  "template": "carousel-teaser",
+  "title": "Carousel teaser Canva",
+  "titleText": "Belajar bikin carousel yang enak di-swipe",
+  "kicker": "teaser carousel",
+  "footerNote": "Bisa dipakai untuk edukasi, jualan, dan personal branding.",
+  "cta": {
+    "label": "Komentar",
+    "keyword": "MAU"
+  },
+  "slides": [
+    {
+      "title": "Hook yang bikin orang berhenti",
+      "body": "Slide pertama harus jelas, singkat, dan bikin penasaran.",
+      "durationInFrames": 60
+    },
+    {
+      "title": "Isi yang gampang dipahami",
+      "body": "Tiap slide cukup satu ide utama supaya tidak terasa penuh.",
+      "durationInFrames": 60
+    },
+    {
+      "title": "Akhiri dengan CTA yang jelas",
+      "body": "Arahkan audiens untuk komentar atau ikut grup belajar.",
+      "durationInFrames": 60
+    }
+  ]
+}

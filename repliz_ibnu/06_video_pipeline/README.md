@@ -34,26 +34,52 @@ Catatan: saat scaffold ini dibuat, Node.js dan npm tersedia, tetapi FFmpeg belum
 ```bash
 npm run dev
 ```
-Lalu buka Remotion Studio untuk preview composition `ShortVideoVertical`.
+Lalu buka Remotion Studio untuk preview composition:
+- `ShortVideoVertical`
+- `QuotePromoVertical`
+- `CarouselTeaserVertical`
 
 ## Render sample MP4
 ```bash
 npm run render:sample
+npm run render:quote
+npm run render:carousel
 ```
 Output default:
 ```bash
 out/canva-animasi-sample.mp4
+out/quote-promo-sample.mp4
+out/carousel-teaser-sample.mp4
+```
+
+## Generator input singkat → render siap pakai
+Template yang didukung saat ini:
+- `quote-promo`
+- `carousel-teaser`
+
+### Generate props dari brief singkat
+```bash
+npm run quick:quote
+npm run quick:carousel
+```
+
+### Render langsung dari brief
+```bash
+node scripts/render-from-brief.mjs examples/briefs/quick-quote-brief.json
+node scripts/render-from-brief.mjs examples/briefs/quick-carousel-brief.json
+```
+
+Output render final otomatis ditulis ke:
+```bash
+/root/.openclaw/workspace/repliz_ibnu/runtime/generated_videos/
 ```
 
 ## Alur kerja singkat
 1. Buat brief JSON di `examples/briefs/` atau folder lain.
-2. Ubah brief jadi props render:
-   ```bash
-   npm run props:sample
-   ```
-3. Preview di Remotion Studio.
-4. Render MP4 final.
-5. Hasil MP4 nanti bisa dipindah ke alur posting/scheduler.
+2. Jalankan `node scripts/render-from-brief.mjs <brief.json>`.
+3. Preview atau render otomatis via Remotion.
+4. Hasil MP4 masuk ke `runtime/generated_videos/`.
+5. File output itu siap dijadikan handoff ke workflow posting/scheduler Repliz.
 
 ## Bentuk data utama
 Props saat ini berisi:
