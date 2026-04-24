@@ -10,14 +10,14 @@
     "lint:config": "node scripts/validate-env.mjs"
   },
   "dependencies": {
-    "@remotion/cli": "^4.0.340",
-    "@remotion/google-fonts": "^4.0.340",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "remotion": "^4.0.340",
-    "zod": "^3.23.8"
+    "@remotion/cli": "4.0.340",
+    "@remotion/google-fonts": "4.0.340",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "remotion": "4.0.340",
+    "zod": "4.3.6"
   },
   "devDependencies": {
-    "typescript": "^5.6.3"
+    "typescript": "5.6.3"
   }
 }
