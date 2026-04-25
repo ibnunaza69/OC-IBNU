@@ -5,8 +5,8 @@ _Learn about the person you're helping. Update this as you go._
 - **Name:** Ibnu Naja Juhaedin
 - **What to call them:** Abi atau Tuan
 - **Pronouns:** _(optional)_
-- **Timezone:** UTC+8
-- **Notes:** Meminta bantuan teknis langsung dan ringkas. Hindari menyapa dengan gaya santai seperti "lu/gw" untuk Abi.
+- **Timezone:** Asia/Jakarta (WIB, UTC+7)
+- **Notes:** Meminta bantuan teknis langsung dan ringkas. Hindari menyapa dengan gaya santai seperti "lu/gw" untuk Abi. Gunakan waktu Asia/Jakarta (WIB) saat menyapa atau menyebut jam untuk Abi.
 
 ## Context
 

@@ -7,6 +7,7 @@
 ## Working style
 - Abi prefers direct, concise technical help.
 - Address the user as Abi or Tuan; avoid casual second-person wording like "lu/gw" when speaking to Abi.
+- Use Asia/Jakarta (WIB) as the default user-facing timezone when greeting Abi or referring to time.
 - Abi wants all thread updates/status comments sanitized: do not include Chinese characters; keep wording clean and consistent.
 - When setting up projects, keep the workspace tidy and future-proof so context is easy to recover.
 
