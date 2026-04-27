@@ -3,4 +3,5 @@ set -euo pipefail
 cd /root/.openclaw/workspace
 export TZ="Asia/Jakarta"
 export PATH="/root/.nvm/versions/node/v22.22.1/bin:$PATH"
-/root/.nvm/versions/node/v22.22.1/bin/node /root/.openclaw/workspace/repliz_ibnu/scripts/repliz-slot-scheduler.mjs report-successes >> /root/.openclaw/workspace/repliz_ibnu/runtime/auto-report.log 2>&1
+ACC="69e0433f84ebdfba15123ba2"
+/root/.nvm/versions/node/v22.22.1/bin/node /root/.openclaw/workspace/repliz_ibnu/scripts/repliz-slot-scheduler.mjs report-successes --account-id "$ACC" >> /root/.openclaw/workspace/repliz_ibnu/runtime/auto-report.log 2>&1
