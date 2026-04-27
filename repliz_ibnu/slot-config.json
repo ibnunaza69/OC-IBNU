@@ -14,6 +14,7 @@
   "dailyTopicFile": "/root/.openclaw/workspace/repliz_ibnu/daily-topics.json",
   "defaultAccountId": "69e0433f84ebdfba15123ba2",
   "defaultProductDayDir": "/root/.openclaw/workspace/repliz_ibnu/02_content_strategy/generated_mix_hookflex_clean",
+  "defaultProductDayGenerateDays": 30,
   "accountRules": {
     "69e0433f84ebdfba15123ba2": {
       "label": "azzamsalmamulia",
