@@ -1,0 +1,43 @@
+{
+  "meta": {
+    "title": "Canva creator carousel",
+    "ratio": "9:16",
+    "fps": 30
+  },
+  "palette": {
+    "background": "#081120",
+    "panel": "#101B37",
+    "primary": "#7DD3FC",
+    "secondary": "#FDE68A",
+    "text": "#F8FAFC",
+    "mutedText": "#CBD5E1"
+  },
+  "brand": {
+    "name": "Canva Belajar Harian",
+    "handle": "@canvabelajar"
+  },
+  "kicker": "creator workflow",
+  "title": "3 kunci bikin carousel yang enak di-swipe",
+  "footerNote": "Format ini cocok untuk edukasi, promosi, dan bangun trust akun.",
+  "cta": {
+    "label": "Komentar",
+    "keyword": "MAU"
+  },
+  "slides": [
+    {
+      "title": "Hook harus bikin berhenti",
+      "body": "Slide pertama harus singkat, jelas, dan menyalakan rasa penasaran.",
+      "durationInFrames": 60
+    },
+    {
+      "title": "Satu slide satu ide",
+      "body": "Biar mudah dibaca, jangan terlalu banyak pesan dalam satu frame.",
+      "durationInFrames": 60
+    },
+    {
+      "title": "Akhiri dengan CTA",
+      "body": "Arahkan audiens untuk komentar, ikut grup, atau minta panduan lanjut.",
+      "durationInFrames": 60
+    }
+  ]
+}

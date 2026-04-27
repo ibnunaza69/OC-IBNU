@@ -1,0 +1,38 @@
+# OpenClaw/private workspace state
+.openclaw/
+AGENTS.md
+BOOTSTRAP.md
+HEARTBEAT.md
+IDENTITY.md
+SOUL.md
+TOOLS.md
+USER.md
+MEMORY.md
+memory/
+memory/.dreams/
+
+# Secrets / env
+.env
+.env.*
+!.env.example
+!growthcircle_image/.env.example
+
+# Logs / runtime state
+*.log
+repliz_ibnu/runtime/
+!repliz_ibnu/runtime/state/
+repliz_ibnu/runtime/state/*.json
+
+# Generated artifacts
+repliz_ibnu/06_video_pipeline/out/
+repliz_ibnu/06_video_pipeline/renders/
+repliz_ibnu/runtime/generated_videos/
+ibnu_whatsapp/data/
+
+# Temp files
+/tmp/
+tmp_*
+
+# OS/editor
+.DS_Store
+Thumbs.db

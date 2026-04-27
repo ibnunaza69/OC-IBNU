@@ -1,0 +1,43 @@
+{
+  "meta": {
+    "title": "Canva animator carousel",
+    "ratio": "9:16",
+    "fps": 30
+  },
+  "palette": {
+    "background": "#081120",
+    "panel": "#101B37",
+    "primary": "#7DD3FC",
+    "secondary": "#FDE68A",
+    "text": "#F8FAFC",
+    "mutedText": "#CBD5E1"
+  },
+  "brand": {
+    "name": "Canva Belajar Harian",
+    "handle": "@canvabelajar"
+  },
+  "kicker": "animator pemula",
+  "title": "Animasi sederhana bisa jadi modal konten harian",
+  "footerNote": "Mulai dari motion ringan yang tetap kelihatan niat.",
+  "cta": {
+    "label": "Komentar",
+    "keyword": "ANIMASI"
+  },
+  "slides": [
+    {
+      "title": "Mulai dari gerak yang simpel",
+      "body": "Tidak harus rumit, yang penting ritmenya enak dilihat.",
+      "durationInFrames": 60
+    },
+    {
+      "title": "Teks dan visual harus seimbang",
+      "body": "Jangan sampai animasi ramai tapi pesannya tidak masuk.",
+      "durationInFrames": 60
+    },
+    {
+      "title": "Pakai template biar cepat",
+      "body": "Workflow yang rapi bikin konten harian lebih realistis dijalankan.",
+      "durationInFrames": 60
+    }
+  ]
+}
