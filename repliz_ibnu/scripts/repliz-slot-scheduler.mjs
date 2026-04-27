@@ -290,22 +290,49 @@ async function ensureHorizon({ accountId, days, dryRun }) {
   const targetSlots = listTargetSlots(occupied, days, slotRules);
   const created = [];
   const dayUsedSlugs = buildDayUsedSlugsMap(schedules.docs ?? []);
+  const scheduledProductDates = new Set();
 
   for (let index = 0; index < targetSlots.length; index += 1) {
     const slot = targetSlots[index];
     const usedSlugs = dayUsedSlugs.get(slot.localDate) ?? new Set();
+    const productDayFile = findDefaultProductDayFile(slot.localDate);
+
+    if (productDayFile && !scheduledProductDates.has(slot.localDate)) {
+      const product = loadProductDayFile(productDayFile);
+      for (const productSlot of product.slots) {
+        const productSlotKey = `${slot.localDate} ${productSlot.time}`;
+        if (occupied.has(productSlotKey)) continue;
+        const scheduleAt = isPastSlotKeyToday(productSlotKey) ? new Date().toISOString() : localDateTimeToUtcIso(slot.localDate, productSlot.time);
+        const payload = buildProductSchedulePayload({ accountId: account._id, slot: productSlot, scheduleAt });
+
+        if (dryRun) {
+          created.push({ slotKey: productSlotKey, localDate: slot.localDate, style: product.style || 'product-day', source: productDayFile, catchUpNow: isPastSlotKeyToday(productSlotKey), payload });
+        } else {
+          const result = await api('/public/schedule', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+          created.push({ slotKey: productSlotKey, localDate: slot.localDate, style: product.style || 'product-day', source: productDayFile, catchUpNow: isPastSlotKeyToday(productSlotKey), created: result });
+        }
+
+        occupied.add(productSlotKey);
+      }
+      scheduledProductDates.add(slot.localDate);
+      continue;
+    }
+
     const topic = pickTopicForSlot(slot, { usedSlugsToday: usedSlugs });
     const scheduleAt = slot.catchUpNow ? new Date().toISOString() : slot.scheduleAtUtc;
     const payload = buildNestedPayload(topic, { account, slot }, { scheduleAt });
 
     if (dryRun) {
-      created.push({ slot, topic, catchUpNow: Boolean(slot.catchUpNow), payload });
+      created.push({ slot, topic, catchUpNow: Boolean(slot.catchUpNow), payload, fallback: 'daily-topics' });
     } else {
       const result = await api('/public/schedule', {
         method: 'POST',
         body: JSON.stringify(payload)
       });
-      created.push({ slot, topic, catchUpNow: Boolean(slot.catchUpNow), created: result });
+      created.push({ slot, topic, catchUpNow: Boolean(slot.catchUpNow), created: result, fallback: 'daily-topics' });
     }
 
     occupied.add(slot.slotKey);
@@ -1050,6 +1077,22 @@ function loadProductDayFile(filePath) {
     affiliateLink: parsed.affiliateLink ?? '',
     slots
   };
+}
+
+function findDefaultProductDayFile(localDate) {
+  const baseDir = config.defaultProductDayDir;
+  if (!baseDir) return null;
+  const resolved = path.resolve(baseDir, `${localDate}.json`);
+  if (!fs.existsSync(resolved)) return null;
+  return resolved;
+}
+
+function isPastSlotKeyToday(slotKey) {
+  const [localDate, localTime] = String(slotKey).split(' ');
+  if (!localDate || !localTime) return false;
+  if (localDate !== currentLocalDateString(new Date())) return false;
+  const slotUtcMs = new Date(localDateTimeToUtcIso(localDate, localTime)).getTime();
+  return slotUtcMs <= Date.now();
 }
 
 function localDateTimeToUtcIso(localDate, localTime) {
