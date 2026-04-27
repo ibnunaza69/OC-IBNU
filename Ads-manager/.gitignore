@@ -1,0 +1,22 @@
+node_modules/
+dist/
+dashboard-dist/
+.env
+.env.local
+coverage/
+.drizzle/
+playwright-report/
+test-results/
+*.log
+
+# Nuxt build artifacts (dashboard-nuxt)
+dashboard-nuxt/.nuxt/
+dashboard-nuxt/.output/
+dashboard-nuxt/dist
+
+# Temporary diff / merge report artifacts
+full_diff.txt
+merge_diff.txt
+diff_output.txt
+tmp-merge-report-table.md
+summary.txt

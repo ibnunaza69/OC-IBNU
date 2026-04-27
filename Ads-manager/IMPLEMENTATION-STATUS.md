@@ -1,0 +1,325 @@
+# Implementation Status
+
+## Selesai di tahap ini
+- scaffold package + TypeScript config
+- Fastify app skeleton
+- worker skeleton
+- env/config schema
+- logger + HTTP helper + error class
+- pg-boss queue wrapper
+- dependencies terinstall
+- PostgreSQL 15 lokal terpasang dan aktif
+- role `metaads` + database `meta_ads_dev` dibuat
+- `.env` lokal dibuat dengan password DB acak yang lebih aman
+- `pg_hba.conf` localhost diubah ke `scram-sha-256`
+- schema awal berhasil di-push ke database
+- migration snapshot Drizzle berhasil digenerate untuk foundation dan sync tables
+- audit repository dibuat
+- credentials state repository dibuat
+- provider request log repository dibuat
+- snapshot repository dibuat untuk:
+  - meta ad account
+  - meta campaigns
+  - meta ad sets
+  - meta ads
+- internal endpoints foundation ditambahkan
+- internal endpoints provider ditambahkan
+- Meta client sekarang terhubung ke:
+  - credentials state
+  - provider request logs
+  - audit logging
+  - normalized error mapping
+  - payload sanitization untuk access token di paging URL
+- KIE client sekarang terhubung ke:
+  - credentials state
+  - provider request logs
+  - audit logging
+  - normalized error mapping
+- live Meta probe sukses
+- live ad account probe sukses
+- live campaign fetch sukses
+- live ad set fetch sukses
+- live ad fetch sukses
+- read-only sync account + campaigns ke DB lokal sukses
+- read-only sync ad sets ke DB lokal sukses
+- read-only sync ads ke DB lokal sukses
+- read-only hierarchy sync (account + campaigns + ad sets + ads) sukses
+- analysis endpoint overview berbasis snapshot lokal sukses
+- analysis endpoint hierarchy berbasis snapshot lokal sukses
+- queued Meta hierarchy sync job sukses
+- worker background meta sync hierarchy sukses
+- safe write gate dasar sukses
+- dry-run status change untuk campaign sukses
+- dry-run status change untuk ad sukses
+- dry-run start campaign endpoint sukses
+- dry-run stop campaign endpoint sukses
+- dry-run start ad endpoint sukses
+- dry-run stop ad endpoint sukses
+- budget control guardrail untuk campaign sukses
+- dry-run set campaign budget sukses
+- dry-run increase campaign budget sukses
+- dry-run decrease campaign budget sukses
+- preview oversized budget change berhasil ditandai out-of-guardrail
+- approval layer write sukses
+- issue approval token untuk live write sukses
+- live budget flow sekarang mensyaratkan approval id/token sukses
+- live write tanpa approval berhasil diblok sebelum request ke Meta
+- live write tetap tertolak saat gate off sukses
+- controlled live campaign start/stop test sukses dengan restore
+- controlled live campaign budget test sukses dengan restore
+- refresh snapshot otomatis setelah live write sukses
+- settle handling untuk status transisi seperti `IN_PROCESS` sukses ditambahkan
+- snapshot lokal ad account sukses
+- snapshot lokal campaign sukses
+- snapshot lokal ad set sukses
+- snapshot lokal ad sukses
+- snapshot lokal rules sukses
+- snapshot lokal rule history sukses
+- rule draft service dasar sukses
+- rule validation service dasar sukses
+- endpoint validasi draft rule sukses
+- dry-run rule create flow sukses
+- dry-run rule update flow sukses
+- dry-run rule enable/disable flow sukses
+- dry-run rule delete flow sukses
+- guardrail `confirmHighImpact` untuk live rule write sukses ditambahkan
+- controlled live test rule create disabled + delete restore sukses
+- controlled live test rule create disabled + enable + disable + delete restore sukses
+- controlled live test rule update + restore + delete sukses
+- create campaign flow dasar sukses
+- dry-run create campaign sukses
+- guardrail create campaign ACTIVE tanpa `confirmHighImpact` sukses memblok request
+- create ad set flow dasar sukses
+- dry-run create ad set sukses
+- validasi parent campaign untuk create ad set sukses
+- create ad flow dasar sukses
+- dry-run create ad sukses
+- validasi parent ad set untuk create ad sukses
+- guardrail create ad ACTIVE tanpa `confirmHighImpact` sukses memblok request
+- duplicate campaign flow dasar sukses
+- dry-run duplicate campaign sukses
+- duplicate ad set flow dasar sukses
+- dry-run duplicate ad set sukses
+- duplicate ad flow dasar sukses
+- dry-run duplicate ad sukses
+- duplicate flow sekarang memakai Meta copy edge resmi, approval token, audit trail, dan refresh snapshot target setelah live copy
+- controlled live test duplicate campaign sukses: source campaign `120245510389280399` berhasil dicopy menjadi campaign baru `120248205683390399` dalam status `PAUSED`, lalu cleanup delete juga sukses
+- controlled live test duplicate ad set sukses: source ad set `120245510389300399` berhasil dicopy ke campaign hasil duplicate sebagai `120248205684520399` dalam status `PAUSED`, lalu cleanup delete juga sukses
+- controlled live test duplicate ad membuktikan route/copy path benar-benar menembak Meta, tetapi source ad `120246901420610399` tertolak oleh policy kreatif sumber (`error_subcode=2875030`: reel dengan musik berhak cipta tidak bisa dipromosikan). Jadi blocker duplicate ad terbaru bersifat content/policy pada creative sumber, bukan kegagalan umum endpoint duplicate ad
+- controlled live test duplicate ad kedua memakai source ad lain (`120247761610390399`) dan menunjukkan blocker eksternal yang berbeda: copyright issue sudah tidak muncul, tetapi Meta tetap menolak dengan `error_subcode=1885183` karena app pembuat post/ad creative masih development mode. Jadi duplicate ad sekarang terbukti tergantung dua hal: promotability creative sumber dan status Live/Public app Meta
+- preflight checker sekarang tersedia untuk create ad dan duplicate ad; hasilnya menggabungkan preview internal, pembacaan context page/creative, dan evidence blocker eksternal terbaru dari audit agar operator tahu apakah path live cenderung `likely-ready`, `conditional`, atau `blocked`
+- promotability inspection sekarang tersedia untuk source ad; ia membaca source ad/creative/page/video dan recent failure evidence untuk membedakan blocker promotability source creative vs blocker app/business context Meta
+- duplicate tree full flow sekarang tersedia untuk `campaign -> ad set -> ad` dengan approval tunggal, rename otomatis, dan rollback cleanup jika step tengah gagal
+- controlled live test duplicate-tree mode aman (`includeAds=false`) sukses end-to-end dan cleanup delete campaign hasil copy juga sukses
+- controlled live test duplicate-tree mode penuh (`includeAds=true`) membuktikan rollback bekerja: proses gagal di duplicate ad karena blocker `1885183`, lalu campaign hasil copy dibersihkan kembali otomatis
+- create ad sekarang mendukung dua strategi creative: reference existing `creativeId` atau inline `objectStorySpec` + `pageId`
+- live create ad via inline creative sekarang menyiapkan ad creative dulu lewat `/adcreatives`, lalu link ke ad create untuk mengurangi blocker permission pada creative reference existing
+- error create ad sekarang mengembalikan hint recovery yang lebih actionable saat gagal karena advertiser/page/creative permission
+- controlled live test create tree kecil sukses untuk campaign + ad set dalam status `PAUSED`
+- jalur lama live create ad via existing creative reference pernah tertahan permission advertiser pada page creative reference
+- live validation jalur inline creative sudah dicoba pada adset test yang sama: percobaan pertama gagal karena `video_data` butuh `image_url`/`image_hash` thumbnail, percobaan kedua sudah melewati itu tetapi tertahan karena ad creative post dibuat oleh app yang masih mode development (Meta meminta app/public mode untuk create ad dari post semacam ini)
+- create campaign live sekarang menyertakan `is_adset_budget_sharing_enabled=false` agar lolos requirement Meta terbaru
+- cleanup/delete flow internal untuk campaign dan ad set hasil create test sekarang sudah ada, termasuk approval, audit, Meta delete call, dan cleanup snapshot lokal bertingkat
+- schema foundation sekarang sudah mencakup `asset_generation_tasks` dan `asset_library` untuk registry image/video asset pipeline
+- internal asset generation routes sekarang sudah ada untuk image submit/poll/callback dan video generation planning
+- worker queue `asset.generation.image.kie.poll` sekarang sudah terdaftar untuk polling task image KIE
+- image generation service sekarang bisa dry-run submit, live submit ke KIE, manual poll, callback ingest, dan simpan output image ke asset registry
+- controlled live test pertama image generation KIE via route internal sukses: submit task live, manual poll sampai `SUCCESS`, lalu output image masuk ke `asset_library`
+- image asset sekarang bisa diperkaya metadata-nya (`mimeType`, `width`, `height`, `byteSize`, `filename`, `thumbnailUrl`) lewat enrichment otomatis saat persist sukses maupun refresh manual per asset
+- image asset registry sekarang sudah tersambung ke flow creative ads: tersedia helper untuk membangun `objectStorySpec.link_data` dari asset image, dan create ad dry-run sekarang bisa menerima `imageAssetId + creativeDraft` langsung
+- video generator phase sekarang sudah punya planning service internal provider-agnostic agar brief/storyboard/status bisa dipersiapkan sebelum provider live dipasang
+- provider live pertama untuk video generation sekarang sudah dipasang via KIE Runway API (submit/poll/callback/persist video asset), dan jalur dry-run berbasis `imageAssetId` sudah terverifikasi
+- controlled live test pertama video generation via KIE Runway sukses: submit live memakai image asset registry, manual poll sampai `success`, lalu output video + thumbnail masuk ke `asset_library`
+- helper creative draft untuk video asset sekarang tersedia; ia bisa resolve `metaVideoId` + thumbnail dari binding Meta yang tersimpan di metadata asset, lalu membentuk `objectStorySpec.video_data` yang valid untuk create ad. Bila binding belum ada, helper tetap jujur mengembalikan constraint `requires-meta-video-id`
+- route baru `POST /internal/assets/videos/:assetId/publish/meta` sekarang tersedia dengan reason + write gate + approval, upload video internal ke Meta, menunggu status `ready`, lalu menyimpan binding `metaVideoId` ke metadata asset untuk dipakai ulang oleh jalur create ad
+- controlled live verification video→Meta pada asset `4e545e1e-d3e1-4b82-9c32-767462bef12d` sukses menghasilkan `metaVideoId=1462775635428416` dengan status `ready`, lengkap dengan thumbnail/source Meta yang tersimpan di metadata asset
+- controlled live test create ad via `videoAssetId + creativeDraft` sudah dijalankan ulang setelah publish flow selesai. Internal blocker `video_data.description` sudah ditemukan dan dibereskan (Meta menolak dengan `error_subcode=1443050`); sesudah fix itu, live create tetap tertahan blocker eksternal Meta yang sama: ad creative/post dianggap dibuat oleh app yang masih mode development (`error_subcode=1885183`)
+- controlled live test create ad via `imageAssetId + creativeDraft` sebelumnya juga sudah menunjukkan blocker eksternal yang sama, jadi titik macet akhir bukan lagi di binding asset internal melainkan di status/public mode app Meta
+- phase `06-copywriting-lab` sekarang sudah terpasang: repository + service + route internal untuk generate variant copy, revision/versioning, list/get variant, dan review copy dengan rubric internal explainable
+- schema foundation sekarang juga mencakup `copy_variants` dan `copy_reviews` untuk menyimpan lineage/version variant copy dan hasil review-nya
+- copy variant generation sekarang bisa diikat ke context `campaignId` / `adSetId` / `adId` dari snapshot lokal agar brief tidak lepas dari tree ads yang sedang dikerjakan
+- review copy sekarang menghasilkan rubric internal (`clarity`, `specificity`, `ctaStrength`, `audienceFit`, `complianceSafety`, `lengthFit`) plus strengths/risks/suggestions yang tersimpan dan bisa diaudit
+- dengan masuknya copywriting lab, seluruh phase delivery di blueprint sekarang sudah punya implementasi internal dasar; sisa yang tertahan tinggal live-path tertentu yang memang depend ke Meta app/public mode dan rollout DB
+- smoke test lokal untuk `POST /internal/copy/variants/generate` dan `POST /internal/copy/reviews` sukses setelah migration di-push ke DB lokal
+- blueprint sekarang ditambah phase `10-dashboard-monitoring` untuk web monitoring internal yang aman di server ini
+- phase `10-dashboard-monitoring` sekarang sudah terpasang di API server yang sama: login page, logout, auth session cookie bertanda tangan, rate limit dasar login gagal, dan dashboard web read-only
+- dashboard summary sekarang menarik ringkasan foundation/provider/analysis/jobs/audits/assets/copy dari sistem yang sudah ada, jadi owner bisa monitor tanpa buka endpoint JSON satu per satu
+- endpoint JSON dashboard summary juga tersedia dan tetap dilindungi auth, sehingga masih bisa dipakai untuk integrasi ringan di belakang halaman web
+- artefak deployment dashboard production sekarang juga sudah disiapkan: checklist rollout, template Caddy, template systemd API/worker, dan helper generate password hash dashboard
+- rollout dashboard production ke domain `mragung.ramadigital.id` sukses: app terpasang di `/opt/meta-ads-dev/app`, service `meta-ads-api` + `meta-ads-worker` aktif via systemd, Caddy aktif sebagai reverse proxy/TLS origin, dan Cloudflare proxied sudah berhasil melayani `/dashboard/login`
+- dashboard monitoring sekarang sudah direfactor ke frontend Vue mobile-first: halaman login + dashboard memakai bundle frontend terpisah yang di-serve dari Fastify, route auth JSON tetap dipertahankan, endpoint baru `/dashboard/api/session` tersedia, dan asset frontend di-serve dengan cache immutable di `/dashboard/assets/*`
+- frontend dashboard sekarang juga sudah diangkat ke base Nuxt UI (`dashboard-vue` direction): `@nuxt/ui` + Tailwind v4 terpasang, layout dashboard memakai komponen/sistem desain Nuxt UI, dan production telah diredeploy dengan asset frontend baru
+- blueprint dan PRD dashboard telah diperluas lagi untuk scope operator workspace: campaign explorer, creative library, workflow explorer, dan settings/credentials page
+- checkpoint sebelum implementasi dashboard multi-page sudah di-commit dan di-push ke GitHub (`2a6030a` — `feat: ship dashboard frontend foundation`)
+- dashboard operator workspace sekarang sudah benar-benar multi-page: `overview`, `campaigns`, `creatives`, `workflows`, dan `settings`, dengan sidebar iconized, route SPA di bawah `/dashboard/*`, dan auth/session backend yang sama tetap dipakai
+- endpoint dashboard baru sekarang aktif: `/dashboard/api/campaigns/hierarchy`, `/dashboard/api/creatives`, `/dashboard/api/workflows`, dan `/dashboard/api/settings`
+- workflow explorer sekarang divisualisasikan dengan Vue Flow dan memakai katalog workflow internal yang bisa dijelaskan ulang saat dibutuhkan
+- campaign explorer sekarang mendukung breakdown hierarchy campaign → ad set → ad plus detail panel di halaman yang sama
+- detail ad di campaigns page sekarang bisa memuat preview creative per-ad langsung dari Meta melalui endpoint auth-protected `/dashboard/api/ads/:adId/detail`, dan bila ada relasi dari flow internal, panel yang sama juga menampilkan linked internal asset
+- campaigns page kini juga sudah menampilkan metrik inti hierarchy (budget, spend, CPC, CPR, clicks, impressions, CTR, reach/result bila tersedia) dan memisahkan aksi `Refresh snapshot` vs `Sync Meta` supaya operator tidak bingung antara reload cache lokal dan live pull ke Meta
+- creative library sekarang menampilkan asset hasil generate dengan filter asset type + preview/metadata penting
+- settings page sekarang menampilkan metadata dashboard/provider/credential state tanpa membocorkan secret mentah
+- build final dashboard multi-page sukses, smoke test lokal sukses untuk login + semua route/page + API baru, dan production `mragung.ramadigital.id` sudah diredeploy dengan bundle baru (`index-d5zoFeGi.js`, `index-BFqY0hQt.css`)
+- smoke test browser/headless dashboard sekarang benar-benar terpasang via Playwright; `npm run test:smoke:dashboard` memverifikasi login, protected route `overview/campaigns/creatives/workflows/settings`, dan interaksi dasar SPA setelah auth di browser headless
+- endpoint duplicate baru untuk campaign/ad set/ad terverifikasi di dry-run lokal: source snapshot berhasil di-resolve, payload approval tersusun benar, dan route internal merespons preview tanpa membuat object baru di Meta
+- controlled live duplicate terbaru menambah bukti bahwa duplicate campaign + ad set sudah lolos penuh di Meta (termasuk cleanup), sedangkan duplicate ad sangat bergantung pada promotability/policy creative sumber yang dipakai oleh ad asal
+- endpoint preflight/promotability baru dan duplicate-tree sekarang juga terverifikasi lokal: typecheck/build lolos, dry-run route merespons benar, smoke test dashboard tetap pass, live duplicate-tree mode aman sukses, dan live duplicate-tree mode penuh membuktikan rollback otomatis berjalan saat ad duplicate mentok di blocker Meta
+- dashboard campaigns page sekarang sudah punya operator console write UI berbasis dashboard-auth route untuk: campaign duplicate / duplicate-tree / delete, ad set duplicate / delete, serta ad promotability inspect / preflight duplicate / duplicate live
+- backend sync hierarchy sekarang juga menarik nested Meta insights 30 hari terakhir pada snapshot campaign/ad set/ad, sehingga dashboard bisa membaca KPI inti tanpa harus query performance live per baris
+- batch lanjutan berikutnya menambahkan live verification runner / regression job operasional berbasis worker queue `meta.verification.runner`, lengkap dengan endpoint run/enqueue/status, sync hierarchy live read, preflight create-ad, promotability inspect, preflight duplicate-ad, duplicate-tree dry-run, dan env hook untuk cron terjadwal
+- verifikasi protected route/API publik pasca-deploy juga sukses: `/dashboard/overview`, `/dashboard/campaigns`, `/dashboard/creatives`, `/dashboard/workflows`, `/dashboard/settings`, plus semua endpoint `/dashboard/api/*` baru sudah merespons benar ketika diberi session valid
+- `/internal/foundation/status` terverifikasi
+- `/internal/foundation/audits` terverifikasi
+- `/internal/foundation/credentials` terverifikasi
+- `/internal/foundation/provider-request-logs` tersedia
+- `/internal/providers/status` terverifikasi
+- `/internal/providers/logs` terverifikasi
+- `/internal/providers/meta/probe` terverifikasi
+- `/internal/providers/meta/ad-account` terverifikasi
+- `/internal/providers/meta/campaigns` terverifikasi
+- `/internal/providers/meta/campaigns/sync` terverifikasi
+- `/internal/providers/meta/adsets` terverifikasi
+- `/internal/providers/meta/adsets/sync` terverifikasi
+- `/internal/providers/meta/ads` terverifikasi
+- `/internal/providers/meta/ads/sync` terverifikasi
+- `/internal/providers/meta/rules` terverifikasi
+- `/internal/providers/meta/rules/sync` terverifikasi
+- `/internal/providers/meta/rules/history` terverifikasi
+- `/internal/providers/meta/rules/history/sync` terverifikasi
+- `/internal/providers/meta/rules/drafts/validate` terverifikasi
+- `POST /internal/providers/meta/campaigns` terverifikasi untuk dry-run
+- `POST /internal/providers/meta/adsets` terverifikasi untuk dry-run
+- `POST /internal/providers/meta/ads` terverifikasi untuk dry-run
+- `POST /internal/providers/meta/ads/preflight/create` terverifikasi
+- `POST /internal/providers/meta/ads/:adId/promotability` terverifikasi
+- `POST /internal/providers/meta/ads/:adId/preflight/duplicate` terverifikasi
+- `POST /internal/providers/meta/campaigns/:campaignId/duplicate` terverifikasi untuk dry-run
+- `POST /internal/providers/meta/campaigns/:campaignId/duplicate-tree` terverifikasi untuk dry-run dan live-safe path
+- `POST /internal/providers/meta/adsets/:adSetId/duplicate` terverifikasi untuk dry-run
+- `POST /internal/providers/meta/ads/:adId/duplicate` terverifikasi untuk dry-run
+- `DELETE /internal/providers/meta/campaigns/:campaignId` tersedia untuk dry-run/live cleanup
+- `DELETE /internal/providers/meta/adsets/:adSetId` tersedia untuk dry-run/live cleanup
+- `POST /internal/providers/meta/rules` terverifikasi untuk dry-run
+- `POST /internal/providers/meta/rules/:ruleId` terverifikasi untuk dry-run
+- `POST /internal/providers/meta/rules/:ruleId/status` terverifikasi untuk dry-run
+- `POST /internal/providers/meta/rules/:ruleId/enable` terverifikasi untuk dry-run
+- `POST /internal/providers/meta/rules/:ruleId/disable` terverifikasi untuk dry-run
+- `DELETE /internal/providers/meta/rules/:ruleId` terverifikasi untuk dry-run
+- `/internal/providers/meta/hierarchy/sync` terverifikasi
+- `/internal/providers/meta/snapshots/ad-account` terverifikasi
+- `/internal/providers/meta/snapshots/campaigns` terverifikasi
+- `/internal/providers/meta/snapshots/adsets` terverifikasi
+- `/internal/providers/meta/snapshots/ads` terverifikasi
+- `/internal/providers/meta/snapshots/rules` terverifikasi
+- `/internal/providers/meta/snapshots/rules/history` terverifikasi
+- `/internal/analysis/overview` terverifikasi
+- `/internal/analysis/hierarchy` terverifikasi
+- `/internal/providers/meta/hierarchy/sync/enqueue` terverifikasi
+- `/internal/foundation/jobs` terverifikasi
+- `/internal/foundation/write-approvals` terverifikasi
+- `/internal/providers/meta/write-gate` terverifikasi
+- `/internal/providers/meta/write-approvals/issue` terverifikasi
+- `GET /internal/assets/generation-tasks` tersedia
+- `GET /internal/assets/generation-tasks/:taskId` tersedia
+- `GET /internal/assets/library` tersedia
+- `GET /internal/assets/library/:assetId` tersedia
+- `POST /internal/assets/images/:assetId/creative-draft` terverifikasi
+- `POST /internal/assets/videos/:assetId/creative-draft` terverifikasi
+- `POST /internal/assets/videos/:assetId/publish/meta` terverifikasi untuk dry-run dan live publish dengan approval
+- `POST /internal/assets/images/generations` terverifikasi untuk dry-run dan live submit
+- `POST /internal/assets/generation-tasks/:taskId/poll` terverifikasi untuk live poll
+- `POST /internal/assets/library/:assetId/refresh-metadata` terverifikasi untuk refresh metadata image asset
+- `POST /internal/assets/kie/callback` tersedia
+- `POST /internal/assets/kie/runway/callback` tersedia
+- `POST /internal/assets/videos/generations` terverifikasi untuk dry-run dan live submit provider `kie-runway`
+- `POST /internal/assets/videos/generations/plan` tersedia
+- `GET /internal/copy/variants` tersedia
+- `GET /internal/copy/variants/:variantId` tersedia
+- `POST /internal/copy/variants/generate` tersedia
+- `POST /internal/copy/variants/:variantId/revise` tersedia
+- `GET /internal/copy/reviews` tersedia
+- `POST /internal/copy/reviews` tersedia
+- `GET /dashboard/login` tersedia
+- `POST /dashboard/login` tersedia
+- `POST /dashboard/logout` tersedia
+- `GET /dashboard` tersedia
+- `GET /dashboard/api/summary` tersedia
+- `GET /dashboard/api/campaigns/hierarchy` tersedia
+- `GET /dashboard/api/ads/:adId/detail` tersedia
+- `GET /dashboard/api/creatives` tersedia
+- `GET /dashboard/api/workflows` tersedia
+- `GET /dashboard/api/settings` tersedia
+- guardrail create campaign/ad set/ad ACTIVE terverifikasi memblok request tanpa `confirmHighImpact`
+- `POST /internal/providers/meta/campaigns/:campaignId/status` terverifikasi untuk dry-run dan live-blocked path
+- `POST /internal/providers/meta/campaigns/:campaignId/start` terverifikasi untuk dry-run
+- `POST /internal/providers/meta/campaigns/:campaignId/stop` terverifikasi untuk dry-run
+- `POST /internal/providers/meta/ads/:adId/status` terverifikasi untuk dry-run
+- `POST /internal/providers/meta/ads/:adId/start` terverifikasi untuk dry-run
+- `POST /internal/providers/meta/ads/:adId/stop` terverifikasi untuk dry-run
+- `POST /internal/providers/meta/campaigns/:campaignId/budget` terverifikasi untuk dry-run
+- `POST /internal/providers/meta/campaigns/:campaignId/budget/increase` terverifikasi untuk dry-run
+- `POST /internal/providers/meta/campaigns/:campaignId/budget/decrease` terverifikasi untuk dry-run
+- credential state update otomatis untuk Meta sudah terverifikasi
+- audit insert dari Meta provider flow sudah terverifikasi
+- worker job dasar `foundation.healthcheck` berhasil dijalankan
+- migration Drizzle baru untuk copywriting lab berhasil digenerate (`0006_spooky_gambit.sql`) dan sudah di-push ke DB lokal proyek
+- typecheck berhasil
+- build berhasil
+- health endpoint berhasil diverifikasi
+- smoke test lokal dashboard auth + protected summary sukses
+- helper CLI `npm run dashboard:hash-password -- "..."` tersedia untuk generate `DASHBOARD_PASSWORD_HASH`
+
+## Batch revisi dashboard berikutnya
+- settings page saat ini baru read-only metadata; owner meminta ada fitur edit dari dashboard
+- creatives page saat ini baru list/filter/preview; owner meminta tombol generate dan hapus agar bisa uji langsung dari dashboard
+- campaigns page masih dianggap berantakan dari sisi UI/UX dan perlu didesain ulang agar lebih enak dibaca sebagai explorer operasional
+- overview page perlu ditingkatkan menjadi control-room yang lebih informatif: status campaign terkini, performa iklan, kesehatan sistem, dan ROAS/KPI bila datanya tersedia
+- theme/color switcher diminta hadir di kanan atas dashboard
+
+## Batch revisi yang sudah selesai (2026-04-06)
+- theme/color switcher ditambahkan di kanan atas dashboard shell
+- overview dirombak menjadi control-room yang lebih enak dilihat, fokus ke system health, campaign status, operational activity, dan state availability untuk ROAS/performance data
+- campaigns page dirombak dari hierarchy dump menjadi master-detail explorer yang lebih rapi dan lebih nyaman dipakai operator
+- creatives page sekarang mendukung generate langsung dari dashboard (image/video form), filter/search, preview, dan hapus asset library dengan konfirmasi
+- settings page sekarang mendukung edit runtime config yang aman dari dashboard (username/policy/account binding/callback/token update tanpa pernah menampilkan secret mentah)
+- workflow explorer dirombak lagi mengikuti arah UX n8n: layout builder-style dengan daftar workflow, canvas utama, dan inspector langkah/koneksi
+- header stats di workflow explorer dirapikan menjadi counter bergaya pill agar blok `Nodes / Connections / Tags` tidak lagi terasa berantakan di header
+- campaigns detail sekarang menampilkan preview creative dari Meta dan linked internal asset jika ada, jadi operator bisa melihat materi iklan langsung dari panel ad tanpa keluar halaman
+- dashboard API diperluas dengan mutation routes baru: `POST /dashboard/api/settings`, `POST /dashboard/api/creatives/generate`, dan `DELETE /dashboard/api/creatives/:assetId`
+- typecheck + build sukses, smoke test lokal sukses (termasuk save settings no-op, creative dry-run generate, delete 404 path), dan production redeploy sukses dengan bundle baru (`index-ChFx4uk0.js`, `index-CUaA9QiV.css`)
+- protected routes/API publik terverifikasi tetap merespons benar setelah redeploy
+
+## Peningkatan non-blocking berikutnya
+- optimasi code-splitting frontend dashboard; build saat ini lolos tetapi bundle utama masih memunculkan warning ukuran chunk Vite
+
+## Batch 2026-04-17 — modul 01 & 02 diselesaikan
+- modul 01 (manage-campaigns): `BulkActionsService` + routes `POST /internal/providers/meta/bulk/status` / `bulk/delete` / `bulk/duplicate-campaigns` (dry-run default, reason wajib, per-target success/error aggregation). Sisa pending modul 01 murni blocker eksternal Meta (`error_subcode=1885183`, app dev mode).
+- modul 02 (ads-analysis):
+  - `PerformanceAnalysisService` — top/bottom performers across campaign/adset/ad × 8 metric; `comparePeriods` via `MetaClient.fetchObjectInsights` (datePreset atau `since/until`, diff absolut + percent)
+  - `RecommendationService` — rule engine `hold / pause / inspect / scale` dengan threshold eksplisit + alasan tekstual per item + breakdown count
+  - shared helper `buildPerformanceMetrics` di-export dari `analysis.service.ts` untuk reuse
+  - routes baru: `GET /internal/analysis/performers`, `GET /internal/analysis/recommendations`, `POST /internal/analysis/compare-periods`
+  - unit tests ditambahkan (11 tests baru, total 88 passing)
+
+## Belum dilakukan
+- controlled live test create tree penuh sampai level ad masih belum selesai karena blocker eksternal Meta belum dibuka: app pembuat creative/post masih mode development dan belum lolos requirement advertiser/public context
+- duplicate ad live belum punya bukti sukses pada source ad yang promotable **setelah** app Meta Live/Public; dua test terakhir menunjukkan dua blocker eksternal berbeda: creative sumber tidak promotable (`2875030`) dan app development mode (`1885183`)
+- dashboard write UI untuk campaign/ad set/ad sekarang sudah tersedia untuk duplicate, duplicate-tree, delete, promotability inspect, dan preflight duplicate; create-ad live UI masih sengaja ditahan karena blocker Meta `1885183` belum hilang
+- live verification runner / regression job operasional sekarang sudah tersedia: sync hierarchy, preflight create-ad, promotability inspect, preflight duplicate-ad, dan duplicate-tree dry-run bisa dijalankan langsung atau diantrikan lewat worker (`meta.verification.runner`)
+- final hardening deployment dashboard internet-facing (set cookie secure + rotate cred final + pasang di domain/Cloudflare production)
+- auth hardening flow provider
+
+## Requirement final dari Meta sebelum live create ad bisa lolos penuh
+1. app Meta yang membuat ad creative/post harus diubah ke **Live/Public mode**; error live terbaru tetap `error_subcode=1885183` selama app masih development mode
+2. token/app harus tetap punya permission write yang relevan untuk Marketing API (`ads_management`) pada business/ad account yang dipakai
+3. page / advertiser context yang dipakai untuk `object_story_spec.page_id` harus valid dan boleh dipakai oleh app/business yang sama untuk membuat materi iklan
+4. setelah requirement di atas terpenuhi, jalur internal yang sekarang sudah siap bisa diuji ulang tanpa ubah kode: publish video asset → reuse `metaVideoId` tersimpan → create ad live berbasis `videoAssetId`
+
+## Langkah aman berikutnya
+1. ubah app Meta ke **live/public** dan pastikan reviewer/owner business memberi advertiser context yang benar untuk page + ad account
+2. setelah app Meta live/public, rerun controlled live test create ad berbasis `videoAssetId` (publish path sekarang sudah siap dan tervalidasi)
+3. setelah itu, jalankan ulang duplicate ad live memakai source ad yang promotable / creative existing yang tidak kena policy copyright, supaya jalur duplicate ad punya bukti sukses seperti campaign + ad set
+4. setelah Meta app Live/Public, tambahkan create-ad live UI di dashboard agar seluruh write flow bisa dioperasikan dari web tanpa manual API call
+5. rollout dashboard ke domain publik setelah dashboard credential final ditentukan dan `DASHBOARD_COOKIE_SECURE=true` di production
+6. lanjut hardening auth/provider setelah flow operasional utama stabil
+8. bila ingin regression otomatis berkala, isi `META_VERIFICATION_RUNNER_CRON` + `META_VERIFICATION_RUNNER_CONFIG_JSON`

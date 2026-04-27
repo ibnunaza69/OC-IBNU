@@ -1,0 +1,23 @@
+[Unit]
+Description=Meta Ads Dev API
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=metaads
+Group=metaads
+WorkingDirectory=/opt/meta-ads-dev/app
+EnvironmentFile=/opt/meta-ads-dev/app/.env
+ExecStart=/usr/bin/node dist/server.js
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/meta-ads-dev/app
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target

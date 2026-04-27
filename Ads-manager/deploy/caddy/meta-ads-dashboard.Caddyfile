@@ -1,0 +1,26 @@
+# Replace dashboard.example.com with your real domain/subdomain.
+# Put this behind Cloudflare if desired; Caddy still terminates TLS on origin.
+
+dashboard.example.com {
+  encode zstd gzip
+
+  header {
+    Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    Permissions-Policy "geolocation=(), microphone=(), camera=()"
+  }
+
+  reverse_proxy 127.0.0.1:3000 {
+    header_up X-Forwarded-Proto {scheme}
+    header_up X-Forwarded-Host {host}
+    header_up X-Forwarded-For {remote_host}
+  }
+
+  log {
+    output file /var/log/caddy/meta-ads-dashboard.log {
+      roll_size 25MiB
+      roll_keep 10
+      roll_keep_for 720h
+    }
+    format json
+  }
+}
