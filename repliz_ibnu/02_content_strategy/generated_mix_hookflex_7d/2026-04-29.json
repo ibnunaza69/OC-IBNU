@@ -1,6 +1,6 @@
 {
   "productName": "MIX 4 PRODUK",
-  "style": "hook-bank-flex-mixed-clean",
+  "style": "hook-bank-flex-mixed",
   "affiliateLink": "mixed-per-slot",
   "sourceProducts": [
     "MADU ZESTMAG",
@@ -8,12 +8,11 @@
     "MADU JAMKORAT",
     "MADU NURUTENZ"
   ],
-  "localDate": "2026-05-02",
   "slots": [
     {
       "time": "05:00",
-      "title": "Napas nyaman dari kebiasaan kecil",
-      "description": "Yang bikin berat bukan cuma napas yang terasa belum lega, tapi rasa tidak nyaman yang kebawa sampai malam.",
+      "title": "Tubuh biasanya tidak langsung terasa drop",
+      "description": "Tubuh biasanya tidak langsung terasa drop. Tapi saluran napas yang kurang nyaman sering kasih sinyal kecil lebih dulu.",
       "replies": [
         "Biasanya mulainya bukan dari langkah besar, tapi dari kebiasaan kecil yang lebih rapi soal kenyamanan pernapasan.",
         "Yang sering terasa membantu justru pola yang sederhana, lebih akrab di badan, dan tidak bikin rutinitas terasa berat.",
@@ -23,7 +22,7 @@
     },
     {
       "time": "08:00",
-      "title": "Badan berat bikin aktivitas turun",
+      "title": "Sore hari sering jadi waktu paling jujur buat sada",
       "description": "Sore hari sering jadi waktu paling jujur buat sadar apakah tubuh masih enak dipakai bergerak atau sebenarnya sudah menahan banyak sinyal.",
       "replies": [
         "Awalnya sering dianggap hal kecil, padahal kalau diulang terus efeknya bisa ikut ganggu fokus dan ritme aktivitas.",
@@ -35,7 +34,7 @@
     },
     {
       "time": "11:00",
-      "title": "Yang sederhana lebih enak dijalani",
+      "title": "Banyak orang baru lebih serius jaga tubuh setelah",
       "description": "Banyak orang baru lebih serius jaga tubuh setelah sadar efeknya nyambung ke fokus, tenaga, dan kualitas hari.",
       "replies": [
         "Karena itu banyak orang cenderung cari sesuatu yang terasa familiar, tidak berlebihan, dan nyaman dipakai rutin.",
@@ -46,8 +45,8 @@
     },
     {
       "time": "14:00",
-      "title": "Sinyal lambung sering diremehkan",
-      "description": "Banyak orang baru serius jaga lambung setelah sadar efeknya nyambung ke makan, fokus, dan kualitas istirahat.",
+      "title": "Awalnya cuma telat makan sesekali",
+      "description": "Awalnya cuma telat makan sesekali. Lama-lama badan mulai kasih sinyal yang makin susah diabaikan.",
       "replies": [
         "Tanda-tandanya sering tidak datang sekaligus, tapi muncul pelan-pelan sampai akhirnya mulai terasa mengganggu.",
         "Ada yang mulai merasa fokus turun. Ada juga yang merasa aktivitas jadi tidak senyaman biasanya.",
@@ -57,8 +56,8 @@
     },
     {
       "time": "17:00",
-      "title": "Sore bikin badan lebih jujur",
-      "description": "Bukan soal cari yang paling ramai dibahas, tapi cari pendamping yang terasa akrab dan gampang dipakai rutin.",
+      "title": "Di titik tertentu",
+      "description": "Di titik tertentu, orang baru sadar bahwa menjaga saluran napas bukan cuma soal reaksi cepat, tapi juga soal ritme hidup.",
       "replies": [
         "Sibuk dari pagi sering bikin orang baru sadar kondisi badan ketika jam mulai melambat.",
         "Di sore hari, tubuh biasanya lebih jujur menunjukkan apakah dari tadi napas dan tenggorokan sebenarnya sudah tertahan cukup lama.",
@@ -69,7 +68,7 @@
     },
     {
       "time": "20:00",
-      "title": "Malam bikin tubuh lebih sensitif",
+      "title": "Kalau gerak mulai terasa kurang bebas",
       "description": "Kalau gerak mulai terasa kurang bebas, biasanya tubuh sudah lama kasih tanda kecil sebelumnya.",
       "replies": [
         "Siang hari kadang masih bisa tertutup karena sibuk dan banyak distraksi.",
@@ -81,7 +80,7 @@
     },
     {
       "time": "23:00",
-      "title": "Badan nyaman bikin besok lebih enak",
+      "title": "Menjelang malam",
       "description": "Menjelang malam, tubuh biasanya lebih jujur menunjukkan apakah dari pagi sudah menahan rasa kurang nyaman.",
       "replies": [
         "Kalau tubuh terasa lebih nyaman, biasanya efeknya ikut nyambung ke istirahat, fokus, dan enaknya jalanin hari berikutnya.",

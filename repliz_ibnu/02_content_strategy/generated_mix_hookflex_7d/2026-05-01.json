@@ -1,6 +1,6 @@
 {
   "productName": "MIX 4 PRODUK",
-  "style": "hook-bank-flex-mixed-clean",
+  "style": "hook-bank-flex-mixed",
   "affiliateLink": "mixed-per-slot",
   "sourceProducts": [
     "MADU ZESTMAG",
@@ -8,11 +8,10 @@
     "MADU JAMKORAT",
     "MADU NURUTENZ"
   ],
-  "localDate": "2026-05-04",
   "slots": [
     {
       "time": "05:00",
-      "title": "Badan nyaman butuh ritme stabil",
+      "title": "Menjelang malam",
       "description": "Menjelang malam, tubuh biasanya lebih jujur menunjukkan apakah dari pagi sudah menahan rasa kurang nyaman.",
       "replies": [
         "Biasanya mulainya bukan dari langkah besar, tapi dari kebiasaan kecil yang lebih rapi soal ritme hidup.",
@@ -23,8 +22,8 @@
     },
     {
       "time": "08:00",
-      "title": "Lambung sensitif ganggu fokus",
-      "description": "Menjelang malam, tubuh biasanya lebih jujur menunjukkan apakah lambung sedang tenang atau sebenarnya sudah capek dari siang tadi.",
+      "title": "Banyak orang fokus ke makanan",
+      "description": "Banyak orang fokus ke makanan, padahal lambung sering capek justru karena ritme harian yang berantakan.",
       "replies": [
         "Awalnya sering dianggap hal kecil, padahal kalau diulang terus efeknya bisa ikut ganggu fokus dan ritme aktivitas.",
         "Yang bikin capek biasanya bukan cuma lambung, tapi rasa tidak nyaman yang kebawa ke pekerjaan dan mood harian.",
@@ -35,8 +34,8 @@
     },
     {
       "time": "11:00",
-      "title": "Pilihan hangat terasa menenangkan",
-      "description": "Yang bikin capek bukan cuma batuknya, tapi ritme kerja dan aktivitas yang ikut terganggu.",
+      "title": "Saat malam mulai tenang",
+      "description": "Saat malam mulai tenang, rasa tidak nyaman di tenggorokan justru sering terasa lebih jelas.",
       "replies": [
         "Karena itu banyak orang cenderung cari sesuatu yang terasa familiar, tidak berlebihan, dan nyaman dipakai rutin.",
         "Bukan soal cari yang paling heboh, tapi cari pendamping yang nyambung dengan kondisi tubuh dan ritme harian.",
@@ -46,7 +45,7 @@
     },
     {
       "time": "14:00",
-      "title": "Tanda tubuh mulai minta ritme",
+      "title": "Banyak orang ingin badan terasa lebih ringan",
       "description": "Banyak orang ingin badan terasa lebih ringan, tapi lupa bahwa ritme makan, gerak, dan istirahat ikut menentukan rasanya.",
       "replies": [
         "Tanda-tandanya sering tidak datang sekaligus, tapi muncul pelan-pelan sampai akhirnya mulai terasa mengganggu.",
@@ -57,7 +56,7 @@
     },
     {
       "time": "17:00",
-      "title": "Sore bikin tubuh terasa apa adanya",
+      "title": "Yang bikin capek bukan cuma kepala atau tengkuk ya",
       "description": "Yang bikin capek bukan cuma kepala atau tengkuk yang terasa tidak enak, tapi fokus harian yang ikut turun.",
       "replies": [
         "Sibuk dari pagi sering bikin orang baru sadar kondisi badan ketika jam mulai melambat.",
@@ -69,8 +68,8 @@
     },
     {
       "time": "20:00",
-      "title": "Malam bikin lambung lebih terasa",
-      "description": "Banyak orang kira lambung cuma rewel kalau makan pedas, padahal telat makan lebih sering bikin badan kasih sinyal pelan-pelan.",
+      "title": "Yang bikin capek bukan cuma perut yang terasa tida",
+      "description": "Yang bikin capek bukan cuma perut yang terasa tidak nyaman, tapi fokus harian yang ikut turun tanpa sadar.",
       "replies": [
         "Siang hari kadang masih bisa tertutup karena sibuk dan banyak distraksi.",
         "Tapi begitu malam lebih tenang, rasa tidak nyaman yang terkait lambung biasanya lebih gampang kerasa.",
@@ -81,8 +80,8 @@
     },
     {
       "time": "23:00",
-      "title": "Napas nyaman bikin tidur enak",
-      "description": "Kalau tenggorokan mulai sensitif, banyak orang cenderung langsung cari sesuatu yang terasa hangat dan familiar di badan.",
+      "title": "Yang bikin berat bukan cuma napas yang terasa belu",
+      "description": "Yang bikin berat bukan cuma napas yang terasa belum lega, tapi rasa tidak nyaman yang kebawa sampai malam.",
       "replies": [
         "Kalau tubuh terasa lebih nyaman, biasanya efeknya ikut nyambung ke istirahat, fokus, dan enaknya jalanin hari berikutnya.",
         "Tubuh jarang langsung protes keras. Biasanya dia kasih sinyal kecil dulu, lalu diulang sampai kita benar-benar notice.",

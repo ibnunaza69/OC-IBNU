@@ -1,6 +1,6 @@
 {
   "productName": "MIX 4 PRODUK",
-  "style": "hook-bank-flex-mixed-clean",
+  "style": "hook-bank-flex-mixed",
   "affiliateLink": "mixed-per-slot",
   "sourceProducts": [
     "MADU ZESTMAG",
@@ -8,11 +8,10 @@
     "MADU JAMKORAT",
     "MADU NURUTENZ"
   ],
-  "localDate": "2026-05-03",
   "slots": [
     {
       "time": "05:00",
-      "title": "Badan ringan dimulai pelan-pelan",
+      "title": "Awalnya cuma cepat capek",
       "description": "Awalnya cuma cepat capek. Lama-lama badan terasa tidak lagi seringan biasanya.",
       "replies": [
         "Biasanya mulainya bukan dari langkah besar, tapi dari kebiasaan kecil yang lebih rapi soal ritme tubuh.",
@@ -23,7 +22,7 @@
     },
     {
       "time": "08:00",
-      "title": "Badan tegang bikin fokus turun",
+      "title": "Yang dicari sebenarnya bukan sesuatu yang terdenga",
       "description": "Yang dicari sebenarnya bukan sesuatu yang terdengar heboh, tapi pendekatan yang sederhana dan realistis dipakai rutin.",
       "replies": [
         "Awalnya sering dianggap hal kecil, padahal kalau diulang terus efeknya bisa ikut ganggu fokus dan ritme aktivitas.",
@@ -35,8 +34,8 @@
     },
     {
       "time": "11:00",
-      "title": "Yang akrab sering lebih nyaman",
-      "description": "Yang dicari sebenarnya bukan sesuatu yang terdengar heboh, tapi yang terasa ramah dan nyaman dipakai rutin.",
+      "title": "Kalau perut kosong mulai terasa tidak enak",
+      "description": "Kalau perut kosong mulai terasa tidak enak, biasanya itu bukan kejadian satu hari saja.",
       "replies": [
         "Karena itu banyak orang cenderung cari sesuatu yang terasa familiar, tidak berlebihan, dan nyaman dipakai rutin.",
         "Bukan soal cari yang paling heboh, tapi cari pendamping yang nyambung dengan kondisi tubuh dan ritme harian.",
@@ -46,8 +45,8 @@
     },
     {
       "time": "14:00",
-      "title": "Saat napas mulai butuh perhatian",
-      "description": "Sore hari tubuh paling jujur menunjukkan apakah dari pagi badan sudah menahan rasa kurang nyaman.",
+      "title": "Kalau ingin napas terasa lebih nyaman",
+      "description": "Kalau ingin napas terasa lebih nyaman, sering kali mulainya justru dari kebiasaan kecil yang dijaga konsisten.",
       "replies": [
         "Tanda-tandanya sering tidak datang sekaligus, tapi muncul pelan-pelan sampai akhirnya mulai terasa mengganggu.",
         "Ada yang mulai merasa fokus turun. Ada juga yang merasa aktivitas jadi tidak senyaman biasanya.",
@@ -57,7 +56,7 @@
     },
     {
       "time": "17:00",
-      "title": "Sore terasa paling jujur di badan",
+      "title": "Banyak orang kira badan berat cuma soal usia atau",
       "description": "Banyak orang kira badan berat cuma soal usia atau capek, padahal pola hidup harian sering jauh lebih berpengaruh.",
       "replies": [
         "Sibuk dari pagi sering bikin orang baru sadar kondisi badan ketika jam mulai melambat.",
@@ -69,7 +68,7 @@
     },
     {
       "time": "20:00",
-      "title": "Malam bikin badan terasa lebih jujur",
+      "title": "Kalau ingin badan terasa lebih nyaman",
       "description": "Kalau ingin badan terasa lebih nyaman, sering kali mulainya justru dari ritme hidup yang lebih stabil.",
       "replies": [
         "Siang hari kadang masih bisa tertutup karena sibuk dan banyak distraksi.",
@@ -81,8 +80,8 @@
     },
     {
       "time": "23:00",
-      "title": "Lambung tenang bikin hari enak",
-      "description": "Masalah lambung sering terasa kecil di awal, sampai akhirnya mulai ganggu mood dan kenyamanan makan.",
+      "title": "Kalau ingin lambung terasa lebih tenang",
+      "description": "Kalau ingin lambung terasa lebih tenang, sering kali mulainya justru dari ritme makan yang lebih rapi.",
       "replies": [
         "Kalau tubuh terasa lebih nyaman, biasanya efeknya ikut nyambung ke istirahat, fokus, dan enaknya jalanin hari berikutnya.",
         "Tubuh jarang langsung protes keras. Biasanya dia kasih sinyal kecil dulu, lalu diulang sampai kita benar-benar notice.",

@@ -8,7 +8,7 @@
     "MADU JAMKORAT",
     "MADU NURUTENZ"
   ],
-  "localDate": "2026-05-04",
+  "localDate": "2026-05-24",
   "slots": [
     {
       "time": "05:00",
@@ -24,7 +24,7 @@
     {
       "time": "08:00",
       "title": "Lambung sensitif ganggu fokus",
-      "description": "Menjelang malam, tubuh biasanya lebih jujur menunjukkan apakah lambung sedang tenang atau sebenarnya sudah capek dari siang tadi.",
+      "description": "Sore hari sering jadi waktu paling jujur buat ngerasa apakah badan dari pagi benar-benar baik-baik saja atau cuma tertahan karena sibuk.",
       "replies": [
         "Awalnya sering dianggap hal kecil, padahal kalau diulang terus efeknya bisa ikut ganggu fokus dan ritme aktivitas.",
         "Yang bikin capek biasanya bukan cuma lambung, tapi rasa tidak nyaman yang kebawa ke pekerjaan dan mood harian.",
@@ -36,7 +36,7 @@
     {
       "time": "11:00",
       "title": "Pilihan hangat terasa menenangkan",
-      "description": "Yang bikin capek bukan cuma batuknya, tapi ritme kerja dan aktivitas yang ikut terganggu.",
+      "description": "Awalnya cuma tenggorokan kurang enak. Lama-lama bicara panjang pun mulai terasa kurang nyaman.",
       "replies": [
         "Karena itu banyak orang cenderung cari sesuatu yang terasa familiar, tidak berlebihan, dan nyaman dipakai rutin.",
         "Bukan soal cari yang paling heboh, tapi cari pendamping yang nyambung dengan kondisi tubuh dan ritme harian.",
@@ -70,7 +70,7 @@
     {
       "time": "20:00",
       "title": "Malam bikin lambung lebih terasa",
-      "description": "Banyak orang kira lambung cuma rewel kalau makan pedas, padahal telat makan lebih sering bikin badan kasih sinyal pelan-pelan.",
+      "description": "Kalau perut kosong mulai terasa tidak enak, biasanya itu bukan kejadian satu hari saja.",
       "replies": [
         "Siang hari kadang masih bisa tertutup karena sibuk dan banyak distraksi.",
         "Tapi begitu malam lebih tenang, rasa tidak nyaman yang terkait lambung biasanya lebih gampang kerasa.",
@@ -82,7 +82,7 @@
     {
       "time": "23:00",
       "title": "Napas nyaman bikin tidur enak",
-      "description": "Kalau tenggorokan mulai sensitif, banyak orang cenderung langsung cari sesuatu yang terasa hangat dan familiar di badan.",
+      "description": "Kalau ingin napas terasa lebih nyaman, sering kali mulainya justru dari kebiasaan kecil yang dijaga konsisten.",
       "replies": [
         "Kalau tubuh terasa lebih nyaman, biasanya efeknya ikut nyambung ke istirahat, fokus, dan enaknya jalanin hari berikutnya.",
         "Tubuh jarang langsung protes keras. Biasanya dia kasih sinyal kecil dulu, lalu diulang sampai kita benar-benar notice.",
