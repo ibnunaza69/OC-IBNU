@@ -295,16 +295,17 @@ async function ensureHorizon({ accountId, days, dryRun }) {
     const slot = targetSlots[index];
     const usedSlugs = dayUsedSlugs.get(slot.localDate) ?? new Set();
     const topic = pickTopicForSlot(slot, { usedSlugsToday: usedSlugs });
-    const payload = buildNestedPayload(topic, { account, slot });
+    const scheduleAt = slot.catchUpNow ? new Date().toISOString() : slot.scheduleAtUtc;
+    const payload = buildNestedPayload(topic, { account, slot }, { scheduleAt });
 
     if (dryRun) {
-      created.push({ slot, topic, payload });
+      created.push({ slot, topic, catchUpNow: Boolean(slot.catchUpNow), payload });
     } else {
       const result = await api('/public/schedule', {
         method: 'POST',
         body: JSON.stringify(payload)
       });
-      created.push({ slot, topic, created: result });
+      created.push({ slot, topic, catchUpNow: Boolean(slot.catchUpNow), created: result });
     }
 
     occupied.add(slot.slotKey);
@@ -690,7 +691,7 @@ function pickTopicForSlot(slot, { forceSlug, usedSlugsToday = new Set() } = {}) 
   return pool[index];
 }
 
-function buildNestedPayload(topic, next) {
+function buildNestedPayload(topic, next, options = {}) {
   const threadLength = config.nestedThreadLength ?? topicsCatalog.threadLength ?? 4;
   const posts = (topic.posts ?? []).slice(0, threadLength).map((text) => sanitizeText(text));
 
@@ -698,12 +699,14 @@ function buildNestedPayload(topic, next) {
     throw new Error(`Topic has no posts: ${topic.slug}`);
   }
 
+  const scheduleAt = options.scheduleAt ?? next.slot.scheduleAtUtc;
+
   return {
     title: sanitizeText(topic.title ?? ''),
     description: posts[0],
     type: config.defaultType ?? 'text',
     medias: [],
-    scheduleAt: next.slot.scheduleAtUtc,
+    scheduleAt,
     accountId: next.account._id,
     replies: posts.slice(1).map((text) => ({
       title: '',
@@ -717,13 +720,22 @@ function buildNestedPayload(topic, next) {
 function listTargetSlots(occupied, days, slotRules = config) {
   const today = new Date();
   const output = [];
+  const now = Date.now();
+  const todayLocalDate = currentLocalDateString(today);
 
   for (let dayOffset = 0; dayOffset < days; dayOffset += 1) {
     const daySlots = buildDaySlots(today, dayOffset, slotRules);
     for (const slot of daySlots) {
-      if (slot.utcMs <= Date.now()) continue;
       if (occupied.has(slot.slotKey)) continue;
-      output.push(slot);
+
+      const isPast = slot.utcMs <= now;
+      const isToday = slot.localDate === todayLocalDate;
+      if (isPast && !isToday) continue;
+
+      output.push({
+        ...slot,
+        catchUpNow: isPast && isToday
+      });
       occupied.add(slot.slotKey);
     }
   }
