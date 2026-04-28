@@ -35,6 +35,14 @@ Menjadikan integrasi Repliz milik Abi sebagai workspace yang rapi, bisa diaudit,
 - `daily-topics.json` — bank topik harian
 - `scripts/` — script runtime project
 
+## Multi-account durable convention
+- Semua akun harus dipisah penuh, minimal pada tiga area: `02_content_strategy/accounts/<account-label>/`, `runtime/accounts/<account-label>__<accountId>/`, dan `slot-config.json -> accountRules`.
+- Generated content per akun harus hidup di `02_content_strategy/accounts/<account-label>/generated_hookflex_clean/`.
+- Log, state, dan artefak runtime per akun harus hidup di `runtime/accounts/<account-label>__<accountId>/{logs,state,generated}/`.
+- Wrapper cron per akun harus menulis hanya ke folder runtime akun itu sendiri.
+- `slot-config.json` wajib menunjuk `defaultProductDayDir` yang spesifik per akun, jangan berbagi folder generated antar akun.
+- Generator akun baru harus punya file/script sendiri bila niche atau CTA-nya berbeda, agar tidak ada campuran tone atau fallback lintas akun.
+
 ## Notes for future work
 - Kalau nanti Abi mau multi-account Repliz, revisi area `01_accounts_access` dan `03_scheduler_ops` dulu.
 - Rule lama `1 post per day` sudah tidak lagi cocok dengan preferensi terbaru Abi; scheduler dan monitoring harus diarahkan ke 7 slot aktif per hari.

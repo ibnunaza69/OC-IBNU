@@ -61,7 +61,7 @@ main();
 function main() {
   const days = Number(getOption('--days') ?? '30');
   const startDate = getOption('--start-date') ?? currentLocalDateString(new Date());
-  const outDir = path.resolve(getOption('--out-dir') ?? path.join(projectRoot, '02_content_strategy/generated_animasiku_hookflex_clean'));
+  const outDir = path.resolve(getOption('--out-dir') ?? path.join(projectRoot, '02_content_strategy/accounts/animasiku2026/generated_hookflex_clean'));
   const dryRun = hasFlag('--dry-run');
 
   ensureDir(outDir);

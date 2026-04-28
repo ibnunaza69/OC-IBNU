@@ -39,6 +39,12 @@ Logika slot, timezone, horizon scheduling, dan kebijakan queue hidup.
 - Jangan ubah item yang sudah `success` kecuali ada instruksi eksplisit dari Abi.
 - Untuk account ini, default format konten scheduler mengikuti `hook-bank-flex-mixed-clean` sampai ada perubahan preferensi.
 
+## Multi-account scheduler convention
+- Tiap akun wajib punya `accountRules` sendiri di `slot-config.json`.
+- `defaultProductDayDir` harus spesifik per akun, jangan menunjuk folder shared generated.
+- Bila akun baru tidak boleh fallback ke topic bank lama, set `disableTopicFallback: true` di `accountRules`.
+- Wrapper cron harus selalu memanggil `ensure-horizon --account-id <id>` secara eksplisit.
+
 ## Operational cautions
 - Jangan asumsikan perubahan timezone otomatis menggeser queue live; audit dulu.
 - Kalau perlu reschedule massal lagi, pakai pola aman: create replacement dulu, delete old pending setelah sukses.

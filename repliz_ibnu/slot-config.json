@@ -13,7 +13,7 @@
   "dailyNestedEnabled": true,
   "dailyTopicFile": "/root/.openclaw/workspace/repliz_ibnu/daily-topics.json",
   "defaultAccountId": "69e0433f84ebdfba15123ba2",
-  "defaultProductDayDir": "/root/.openclaw/workspace/repliz_ibnu/02_content_strategy/generated_mix_hookflex_clean",
+  "defaultProductDayDir": "/root/.openclaw/workspace/repliz_ibnu/02_content_strategy/accounts/infosehat_ku/generated_hookflex_clean",
   "defaultProductDayGenerateDays": 30,
   "accountRules": {
     "69e0433f84ebdfba15123ba2": {
@@ -36,7 +36,7 @@
       "startHour": 5,
       "startMinute": 0,
       "intervalHours": 3,
-      "defaultProductDayDir": "/root/.openclaw/workspace/repliz_ibnu/02_content_strategy/generated_animasiku_hookflex_clean",
+      "defaultProductDayDir": "/root/.openclaw/workspace/repliz_ibnu/02_content_strategy/accounts/animasiku2026/generated_hookflex_clean",
       "disableTopicFallback": true
     }
   }

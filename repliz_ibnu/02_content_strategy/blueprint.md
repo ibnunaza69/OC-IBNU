@@ -9,6 +9,14 @@
 ## Scope
 Strategi konten harian untuk Threads via Repliz.
 
+## Multi-account folder convention
+- Shared reference boleh tetap di root `02_content_strategy/` selama benar-benar reusable lintas akun.
+- Semua output generated yang dipakai live harus dipisah per akun di `02_content_strategy/accounts/<account-label>/generated_hookflex_clean/`.
+- Akun dengan niche/CTA berbeda harus punya generator atau preset sendiri; jangan berbagi folder generated.
+- Contoh aktif saat ini:
+  - `accounts/infosehat_ku/generated_hookflex_clean/`
+  - `accounts/animasiku2026/generated_hookflex_clean/`
+
 ## Durable content rules
 - Niche aktif: `kesehatan` dan `herbal`
 - Format utama: nested thread

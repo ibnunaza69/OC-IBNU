@@ -13,6 +13,13 @@ Script yang benar-benar menjalankan operasi Repliz dari workspace ini.
 - `../scripts/repliz-slot-scheduler.mjs` — scheduler utama
 - `../scripts/repliz-daily-cron.sh` — wrapper cron harian
 
+## Multi-account runtime convention
+- Runtime per akun wajib dipisah di `../runtime/accounts/<account-label>__<accountId>/`.
+- Minimal subfolder runtime akun: `logs/`, `state/`, `generated/`.
+- Log `generator`, `cron`, dan `auto-report` harus menulis ke folder runtime akun yang sesuai.
+- File state report Telegram juga harus spesifik per akun.
+- Akun baru idealnya punya wrapper sendiri, misalnya `repliz-daily-cron-<label>.sh` dan `repliz-auto-report-<label>.sh`.
+
 ## Supported commands
 - `next`
 - `slots`
