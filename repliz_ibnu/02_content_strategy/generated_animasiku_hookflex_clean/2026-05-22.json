@@ -1,24 +1,25 @@
 {
   "productName": "ANIMASIKU CONTENT MIX",
   "style": "hook-bank-flex-canva-group-clean",
-  "affiliateLink": "cta-group-ikut",
+  "ctaMode": "reply-keyword",
+  "ctaKeyword": "KELAS",
   "sourceThemes": [
     "animasi",
     "carousel",
     "infografis",
-    "affiliate",
-    "creator"
+    "creator",
+    "workflow"
   ],
   "localDate": "2026-05-22",
   "slots": [
     {
       "time": "05:00",
       "title": "Canva enak dimulai simpel",
-      "description": "Konten creator yang konsisten biasanya lahir dari sistem yang ringan dijalani, bukan dari semangat sesaat.",
+      "description": "Workflow konten yang rapi biasanya bikin ide lebih gampang dieksekusi tanpa keburu capek duluan.",
       "replies": [
-        "Kalau baru mulai, jangan kejar hasil yang terlalu ramai dulu. Fokus dulu ke alur yang gampang diulang.",
-        "Biasanya yang bikin cepat berkembang itu bukan trik rumit, tapi workflow yang sederhana dan konsisten.",
-        "Kalau mau, balas IKUT. Nanti saya arahkan masuk ke alur belajarnya pelan-pelan."
+        "Kalau baru mulai, tidak perlu langsung mengejar hasil yang ramai. Yang penting alurnya terasa ringan dan mudah diulang.",
+        "Biasanya progres yang paling enak justru datang dari workflow sederhana yang konsisten dipakai.",
+        "Kalau mau, balas KELAS. Nanti saya arahkan ke materi belajarnya pelan-pelan."
       ]
     },
     {
@@ -26,9 +27,9 @@
       "title": "Carousel bagus butuh alur",
       "description": "Banyak pemula ingin hasil animasi yang keren, tapi sering lupa kalau ritme gerak yang sederhana justru lebih nyaman ditonton.",
       "replies": [
-        "Seringnya bukan idenya yang kurang, tapi struktur kontennya belum bikin orang mau lanjut lihat.",
-        "Begitu urutan, visual, dan fokus pesan lebih rapi, performanya biasanya ikut lebih enak.",
-        "Kalau mau, balas IKUT. Nanti saya arahkan masuk ke alurnya."
+        "Sering kali bukan idenya yang kurang, tapi struktur kontennya belum cukup nyaman diikuti audiens.",
+        "Begitu urutan, visual, dan fokus pesannya lebih rapi, hasilnya biasanya ikut terasa lebih enak.",
+        "Kalau mau, balas KELAS. Nanti saya kirim arah belajar yang relevan."
       ]
     },
     {
@@ -36,9 +37,9 @@
       "title": "Template bagus tetap butuh arah",
       "description": "Kalau konten swipe terasa berat, biasanya masalahnya ada di struktur, bukan di desain semata.",
       "replies": [
-        "Banyak hasil yang kelihatan profesional justru dibangun dari elemen yang simpel tapi rapi.",
-        "Jadi bukan harus ribet, tapi harus jelas arahnya dari awal.",
-        "Kalau mau belajar bareng step yang ringan, balas IKUT ya."
+        "Banyak hasil yang terlihat rapi justru dibangun dari elemen sederhana yang dipakai dengan tepat.",
+        "Jadi tidak harus rumit, yang penting jelas arah dan fungsi tiap bagiannya.",
+        "Kalau mau belajar step yang ringan, balas KELAS ya."
       ]
     },
     {
@@ -46,29 +47,29 @@
       "title": "Kesalahan kecil bikin hasil berat",
       "description": "Infografis yang bagus itu bikin informasi cepat masuk tanpa bikin mata capek.",
       "replies": [
-        "Kesalahan kecil yang diulang terus biasanya bikin hasil konten terasa berat walau templatenya bagus.",
-        "Begitu titik salahnya ketemu, proses desain biasanya jauh lebih ringan.",
-        "Kalau mau, saya bisa arahkan step gabungnya. Balas IKUT ya."
+        "Kesalahan kecil yang terus diulang memang sering bikin hasil terasa lebih berat dari yang seharusnya.",
+        "Begitu titik kelirunya ketemu, proses desain biasanya jauh lebih lega dijalani.",
+        "Kalau mau, balas KELAS. Nanti saya arahkan ke pembahasan yang pas."
       ]
     },
     {
       "time": "17:00",
       "title": "Capek ngonten biasanya dari proses",
-      "description": "Banyak konten affiliate sepi bukan karena produknya salah, tapi karena kontennya belum terasa relevan buat audiens.",
+      "description": "Banyak creator berhenti di tengah jalan bukan karena tidak bisa desain, tapi karena workflow-nya terlalu bikin capek.",
       "replies": [
-        "Kalau proses bikin konten terlalu melelahkan, konsistensi biasanya yang pertama jatuh.",
-        "Makanya sistem kerja yang ringan itu sama pentingnya dengan hasil desainnya sendiri.",
-        "Kalau mau ikut alur belajar yang lebih rapi, balas IKUT."
+        "Kalau proses bikin konten terlalu melelahkan, konsistensi biasanya jadi lebih susah dijaga.",
+        "Makanya workflow yang ringan itu penting, bukan cuma supaya hasilnya bagus, tapi juga supaya prosesnya nyaman.",
+        "Kalau mau ikut alur belajar yang lebih rapi, balas KELAS."
       ]
     },
     {
       "time": "20:00",
       "title": "Canva lebih enak kalau setup rapi",
-      "description": "Kalau mau akun tumbuh, yang dibenahi bukan cuma hasil akhir, tapi juga proses bikin kontennya.",
+      "description": "Kalau prosesnya ringan, konsistensi biasanya jauh lebih mungkin dijaga.",
       "replies": [
-        "Tool yang tepat itu bukan yang paling banyak, tapi yang paling kepakai buat bikin kerja lebih ringan.",
-        "Sedikit tapi kepakai rutin biasanya lebih kuat daripada banyak tapi bikin bingung.",
-        "Kalau mau, nanti saya arahkan resource dan step masuknya. Balas IKUT ya."
+        "Tool yang tepat biasanya bukan yang paling banyak, tapi yang paling membantu kerja terasa lebih ringan.",
+        "Sedikit tapi benar-benar kepakai sering lebih berguna daripada banyak tapi bikin bingung.",
+        "Kalau mau, balas KELAS. Nanti saya arahkan ke resource yang relevan."
       ]
     },
     {
@@ -76,9 +77,9 @@
       "title": "Belajar bareng lebih enak jalan",
       "description": "Animasi Canva yang enak dilihat biasanya justru datang dari gerakan kecil yang rapi, bukan efek yang terlalu ramai.",
       "replies": [
-        "Kalau jalan sendiri sering mentok, belajar bareng biasanya bikin prosesnya lebih enak dijaga.",
-        "Biar nggak bingung mulai dari mana, lebih enak masuk ke alur yang sudah disusun.",
-        "Kalau mau ikut, balas IKUT. Nanti saya arahkan step gabungnya."
+        "Kalau belajar sendiri terasa loncat-loncat, biasanya lebih enak kalau masuk ke alur yang sudah disusun rapi.",
+        "Dengan begitu, prosesnya lebih tenang dan tidak bingung mulai dari mana dulu.",
+        "Kalau tertarik, balas KELAS. Nanti saya arahkan langkah berikutnya."
       ]
     }
   ]

@@ -291,6 +291,8 @@ async function ensureHorizon({ accountId, days, dryRun }) {
   const created = [];
   const dayUsedSlugs = buildDayUsedSlugsMap(schedules.docs ?? []);
   const scheduledProductDates = new Set();
+  const accountRule = config.accountRules?.[account._id] ?? {};
+  const disableTopicFallback = Boolean(accountRule.disableTopicFallback);
 
   for (let index = 0; index < targetSlots.length; index += 1) {
     const slot = targetSlots[index];
@@ -318,6 +320,11 @@ async function ensureHorizon({ accountId, days, dryRun }) {
         occupied.add(productSlotKey);
       }
       scheduledProductDates.add(slot.localDate);
+      continue;
+    }
+
+    if (disableTopicFallback) {
+      created.push({ slot, skipped: true, reason: 'missing-product-day-file-and-fallback-disabled' });
       continue;
     }
 
