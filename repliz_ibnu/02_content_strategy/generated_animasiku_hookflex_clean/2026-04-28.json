@@ -1,0 +1,85 @@
+{
+  "productName": "ANIMASIKU CONTENT MIX",
+  "style": "hook-bank-flex-canva-group-clean",
+  "affiliateLink": "cta-group-ikut",
+  "sourceThemes": [
+    "animasi",
+    "carousel",
+    "infografis",
+    "affiliate",
+    "creator"
+  ],
+  "localDate": "2026-04-28",
+  "slots": [
+    {
+      "time": "05:00",
+      "title": "Canva enak dimulai simpel",
+      "description": "Animasi Canva yang enak dilihat biasanya justru datang dari gerakan kecil yang rapi, bukan efek yang terlalu ramai.",
+      "replies": [
+        "Kalau baru mulai, jangan kejar hasil yang terlalu ramai dulu. Fokus dulu ke alur yang gampang diulang.",
+        "Biasanya yang bikin cepat berkembang itu bukan trik rumit, tapi workflow yang sederhana dan konsisten.",
+        "Kalau mau, balas IKUT. Nanti saya arahkan masuk ke alur belajarnya pelan-pelan."
+      ]
+    },
+    {
+      "time": "08:00",
+      "title": "Carousel bagus butuh alur",
+      "description": "Banyak carousel sepi bukan karena topiknya jelek, tapi karena urutan slide pertama sampai ketiganya kurang nahan perhatian.",
+      "replies": [
+        "Seringnya bukan idenya yang kurang, tapi struktur kontennya belum bikin orang mau lanjut lihat.",
+        "Begitu urutan, visual, dan fokus pesan lebih rapi, performanya biasanya ikut lebih enak.",
+        "Kalau mau, balas IKUT. Nanti saya arahkan masuk ke alurnya."
+      ]
+    },
+    {
+      "time": "11:00",
+      "title": "Template bagus tetap butuh arah",
+      "description": "Kalau infografis terasa penuh, sering kali yang perlu dikurangi bukan datanya, tapi gangguan visualnya.",
+      "replies": [
+        "Banyak hasil yang kelihatan profesional justru dibangun dari elemen yang simpel tapi rapi.",
+        "Jadi bukan harus ribet, tapi harus jelas arahnya dari awal.",
+        "Kalau mau belajar bareng step yang ringan, balas IKUT ya."
+      ]
+    },
+    {
+      "time": "14:00",
+      "title": "Kesalahan kecil bikin hasil berat",
+      "description": "Konten affiliate yang enak itu terasa seperti membantu orang pilih, bukan sekadar menyuruh beli.",
+      "replies": [
+        "Kesalahan kecil yang diulang terus biasanya bikin hasil konten terasa berat walau templatenya bagus.",
+        "Begitu titik salahnya ketemu, proses desain biasanya jauh lebih ringan.",
+        "Kalau mau, saya bisa arahkan step gabungnya. Balas IKUT ya."
+      ]
+    },
+    {
+      "time": "17:00",
+      "title": "Capek ngonten biasanya dari proses",
+      "description": "Banyak creator berhenti di tengah jalan bukan karena tidak bisa desain, tapi karena workflow-nya terlalu bikin capek.",
+      "replies": [
+        "Kalau proses bikin konten terlalu melelahkan, konsistensi biasanya yang pertama jatuh.",
+        "Makanya sistem kerja yang ringan itu sama pentingnya dengan hasil desainnya sendiri.",
+        "Kalau mau ikut alur belajar yang lebih rapi, balas IKUT."
+      ]
+    },
+    {
+      "time": "20:00",
+      "title": "Canva lebih enak kalau setup rapi",
+      "description": "Kalau motion di Canva terasa kasar, sering kali masalahnya bukan di template, tapi di urutan geraknya.",
+      "replies": [
+        "Tool yang tepat itu bukan yang paling banyak, tapi yang paling kepakai buat bikin kerja lebih ringan.",
+        "Sedikit tapi kepakai rutin biasanya lebih kuat daripada banyak tapi bikin bingung.",
+        "Kalau mau, nanti saya arahkan resource dan step masuknya. Balas IKUT ya."
+      ]
+    },
+    {
+      "time": "23:00",
+      "title": "Belajar bareng lebih enak jalan",
+      "description": "Carousel yang enak dibaca itu bukan yang paling ramai, tapi yang bikin orang mau swipe sampai slide terakhir.",
+      "replies": [
+        "Kalau jalan sendiri sering mentok, belajar bareng biasanya bikin prosesnya lebih enak dijaga.",
+        "Biar nggak bingung mulai dari mana, lebih enak masuk ke alur yang sudah disusun.",
+        "Kalau mau ikut, balas IKUT. Nanti saya arahkan step gabungnya."
+      ]
+    }
+  ]
+}

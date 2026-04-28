@@ -29,6 +29,14 @@
       "startHour": 5,
       "startMinute": 30,
       "intervalHours": 3
+    },
+    "69ef062d877ca2e454025d24": {
+      "label": "animasiku2026",
+      "slotCount": 7,
+      "startHour": 5,
+      "startMinute": 0,
+      "intervalHours": 3,
+      "defaultProductDayDir": "/root/.openclaw/workspace/repliz_ibnu/02_content_strategy/generated_animasiku_hookflex_clean"
     }
   }
 }

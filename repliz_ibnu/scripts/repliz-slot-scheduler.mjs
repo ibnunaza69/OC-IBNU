@@ -295,7 +295,7 @@ async function ensureHorizon({ accountId, days, dryRun }) {
   for (let index = 0; index < targetSlots.length; index += 1) {
     const slot = targetSlots[index];
     const usedSlugs = dayUsedSlugs.get(slot.localDate) ?? new Set();
-    const productDayFile = findDefaultProductDayFile(slot.localDate);
+    const productDayFile = findDefaultProductDayFile(slot.localDate, account);
 
     if (productDayFile && !scheduledProductDates.has(slot.localDate)) {
       const product = loadProductDayFile(productDayFile);
@@ -551,7 +551,8 @@ async function processComments({ accountId, dryRun, limit, alreadyProcessedIds =
 
 async function reportSuccesses({ accountId, date, dryRun }) {
   const report = await reportDay({ accountId, date });
-  const state = readJsonFile(reportStatePath, { deliveredIds: [], deliveredKeys: [] });
+  const accountReportStatePath = getReportStatePath(report.account);
+  const state = readJsonFile(accountReportStatePath, { deliveredIds: [], deliveredKeys: [] });
   const deliveredIds = new Set(Array.isArray(state.deliveredIds) ? state.deliveredIds : []);
   const deliveredKeys = new Set(Array.isArray(state.deliveredKeys) ? state.deliveredKeys : []);
   const newlySucceededSlots = report.slots.filter((row) => row.status === 'success' && row.id && !deliveredIds.has(row.id));
@@ -614,7 +615,7 @@ async function reportSuccesses({ accountId, date, dryRun }) {
     if (item.id) deliveredIds.add(item.id);
     deliveredKeys.add(item.key);
   }
-  writeJsonFile(reportStatePath, {
+  writeJsonFile(accountReportStatePath, {
     deliveredIds: Array.from(deliveredIds),
     deliveredKeys: Array.from(deliveredKeys)
   });
@@ -1029,6 +1030,11 @@ function buildCommentReply(item) {
   return `${prefix}Makasih sudah ikut nimbrung 🙌 Semoga thread ini relevan dan ada bagian yang bisa dipakai di rutinitas harian kamu 😊`;
 }
 
+function getReportStatePath(account) {
+  const suffix = account?._id ? `telegram-report-state.${account._id}.json` : 'telegram-report-state.json';
+  return path.join(stateRoot, suffix);
+}
+
 function sanitizeText(text) {
   const trimmed = String(text ?? '').trim();
   if (!config.sanitizeChineseCharacters) return trimmed;
@@ -1079,8 +1085,9 @@ function loadProductDayFile(filePath) {
   };
 }
 
-function findDefaultProductDayFile(localDate) {
-  const baseDir = config.defaultProductDayDir;
+function findDefaultProductDayFile(localDate, account = null) {
+  const accountRuleDir = account?._id ? config.accountRules?.[account._id]?.defaultProductDayDir : null;
+  const baseDir = accountRuleDir || config.defaultProductDayDir;
   if (!baseDir) return null;
   const resolved = path.resolve(baseDir, `${localDate}.json`);
   if (!fs.existsSync(resolved)) return null;
