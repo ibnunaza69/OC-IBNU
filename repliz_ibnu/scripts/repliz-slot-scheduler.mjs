@@ -11,9 +11,11 @@ const runtimeRoot = path.join(projectRoot, 'runtime');
 const stateRoot = path.join(runtimeRoot, 'state');
 const reportStatePath = path.join(stateRoot, 'telegram-report-state.json');
 const commentStatePath = path.join(stateRoot, 'comment-worker-state.json');
+const accountsRuntimeRoot = path.join(runtimeRoot, 'accounts');
 
 ensureDir(runtimeRoot);
 ensureDir(stateRoot);
+ensureDir(accountsRuntimeRoot);
 
 loadSimpleEnv(globalEnvPath);
 
@@ -1037,9 +1039,26 @@ function buildCommentReply(item) {
   return `${prefix}Makasih sudah ikut nimbrung 🙌 Semoga thread ini relevan dan ada bagian yang bisa dipakai di rutinitas harian kamu 😊`;
 }
 
+function getAccountRuntimeDir(account) {
+  const label = sanitizeFileName(account?.username || account?.name || account?._id || 'unknown-account');
+  const dir = path.join(accountsRuntimeRoot, `${label}__${account?._id || 'unknown'}`);
+  ensureDir(dir);
+  ensureDir(path.join(dir, 'state'));
+  ensureDir(path.join(dir, 'logs'));
+  ensureDir(path.join(dir, 'generated'));
+  return dir;
+}
+
 function getReportStatePath(account) {
-  const suffix = account?._id ? `telegram-report-state.${account._id}.json` : 'telegram-report-state.json';
-  return path.join(stateRoot, suffix);
+  if (!account?._id) return path.join(stateRoot, 'telegram-report-state.json');
+  return path.join(getAccountRuntimeDir(account), 'state', 'telegram-report-state.json');
+}
+
+function sanitizeFileName(value) {
+  return String(value || 'unknown')
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'unknown';
 }
 
 function sanitizeText(text) {

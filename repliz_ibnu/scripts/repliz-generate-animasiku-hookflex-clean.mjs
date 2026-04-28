@@ -95,7 +95,7 @@ function buildDayDocument(localDate, dayIndex) {
     productName: 'ANIMASIKU CONTENT MIX',
     style: 'hook-bank-flex-canva-group-clean',
     ctaMode: 'reply-keyword',
-    ctaKeyword: 'KELAS',
+    ctaKeyword: 'Mau',
     sourceThemes: themes,
     localDate,
     slots
@@ -107,37 +107,37 @@ function buildReplies(theme, mode) {
     start: [
       'Kalau baru mulai, tidak perlu langsung mengejar hasil yang ramai. Yang penting alurnya terasa ringan dan mudah diulang.',
       'Biasanya progres yang paling enak justru datang dari workflow sederhana yang konsisten dipakai.',
-      'Kalau mau, balas KELAS. Nanti saya arahkan ke materi belajarnya pelan-pelan.'
+      'Kalau mau, balas Mau ya. Nanti saya arahkan ke materi belajarnya pelan-pelan.'
     ],
     pain: [
       'Sering kali bukan idenya yang kurang, tapi struktur kontennya belum cukup nyaman diikuti audiens.',
       'Begitu urutan, visual, dan fokus pesannya lebih rapi, hasilnya biasanya ikut terasa lebih enak.',
-      'Kalau mau, balas KELAS. Nanti saya kirim arah belajar yang relevan.'
+      'Kalau mau, balas Mau ya. Nanti saya kirim arah belajar yang relevan.'
     ],
     simple: [
       'Banyak hasil yang terlihat rapi justru dibangun dari elemen sederhana yang dipakai dengan tepat.',
       'Jadi tidak harus rumit, yang penting jelas arah dan fungsi tiap bagiannya.',
-      'Kalau mau belajar step yang ringan, balas KELAS ya.'
+      'Kalau mau belajar step yang ringan, balas Mau ya.'
     ],
     mistake: [
       'Kesalahan kecil yang terus diulang memang sering bikin hasil terasa lebih berat dari yang seharusnya.',
       'Begitu titik kelirunya ketemu, proses desain biasanya jauh lebih lega dijalani.',
-      'Kalau mau, balas KELAS. Nanti saya arahkan ke pembahasan yang pas.'
+      'Kalau mau, balas Mau ya. Nanti saya arahkan ke pembahasan yang pas.'
     ],
     workflow: [
       'Kalau proses bikin konten terlalu melelahkan, konsistensi biasanya jadi lebih susah dijaga.',
       'Makanya workflow yang ringan itu penting, bukan cuma supaya hasilnya bagus, tapi juga supaya prosesnya nyaman.',
-      'Kalau mau ikut alur belajar yang lebih rapi, balas KELAS.'
+      'Kalau mau ikut alur belajar yang lebih rapi, balas Mau ya.'
     ],
     toolkit: [
       'Tool yang tepat biasanya bukan yang paling banyak, tapi yang paling membantu kerja terasa lebih ringan.',
       'Sedikit tapi benar-benar kepakai sering lebih berguna daripada banyak tapi bikin bingung.',
-      'Kalau mau, balas KELAS. Nanti saya arahkan ke resource yang relevan.'
+      'Kalau mau, balas Mau ya. Nanti saya arahkan ke resource yang relevan.'
     ],
     cta: [
       'Kalau belajar sendiri terasa loncat-loncat, biasanya lebih enak kalau masuk ke alur yang sudah disusun rapi.',
       'Dengan begitu, prosesnya lebih tenang dan tidak bingung mulai dari mana dulu.',
-      'Kalau tertarik, balas KELAS. Nanti saya arahkan langkah berikutnya.'
+      'Kalau tertarik, balas Mau ya. Nanti saya arahkan langkah berikutnya.'
     ]
   };
   return map[mode] ?? map.simple;
